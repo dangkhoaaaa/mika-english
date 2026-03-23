@@ -3,23 +3,17 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
+	"mika-english-backend/internal/config"
 	"mika-english-backend/internal/handlers"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = os.Getenv("APP_PORT")
-	}
-	if port == "" {
-		port = "8080"
-	}
+	cfg := config.Load()
 
 	router := handlers.NewRouter()
-	log.Printf("Mika English API running on :%s", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
+	log.Printf("Mika English API running on :%s", cfg.AppPort)
+	if err := http.ListenAndServe(":"+cfg.AppPort, router); err != nil {
 		log.Fatal(err)
 	}
 }

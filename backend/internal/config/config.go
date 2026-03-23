@@ -24,8 +24,16 @@ type Config struct {
 
 func Load() Config {
 	loadDotEnvOnce()
+
+	// Ưu tiên biến PORT từ môi trường hosting (vd: Render).
+	// Nếu không có, mới dùng APP_PORT (cho local dev) hoặc fallback.
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = getEnv("APP_PORT", "8080")
+	}
+
 	return Config{
-		AppPort:      getEnv("APP_PORT", "8080"),
+		AppPort:      port,
 		MongoURI:     getEnv("MONGO_URI", "mongodb://localhost:27017"),
 		MongoDBName:  getEnv("MONGO_DB_NAME", "mika_english"),
 		JWTSecretKey: getEnv("JWT_SECRET", "dev-secret"),
