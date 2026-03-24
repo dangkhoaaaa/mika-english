@@ -53,6 +53,90 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*models
 	return &user, err
 }
 
+func (r *UserRepository) FindByID(ctx context.Context, id string) (*models.User, error) {
+	var user models.User
+	err := r.col.FindOne(ctx, bson.M{"_id": toObjectID(id)}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
+	return &user, err
+}
+
+func (r *UserRepository) ListByIDs(ctx context.Context, ids []string) ([]models.User, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	oids := make([]primitive.ObjectID, 0, len(ids))
+	for _, id := range ids {
+		oid, err := primitiveObjectIDFromHex(id)
+		if err != nil {
+			continue
+		}
+		oids = append(oids, oid)
+	}
+	if len(oids) == 0 {
+		return nil, nil
+	}
+	cursor, err := r.col.Find(ctx, bson.M{"_id": bson.M{"$in": oids}})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	out := make([]models.User, 0)
+	for cursor.Next(ctx) {
+		var u models.User
+		if err := cursor.Decode(&u); err != nil {
+			return nil, err
+		}
+		out = append(out, u)
+	}
+	return out, cursor.Err()
+}
+
+func (r *UserRepository) SearchUsers(ctx context.Context, q string, limit int64) ([]models.User, error) {
+	if limit <= 0 || limit > 50 {
+		limit = 20
+	}
+	filter := bson.M{}
+	if q != "" {
+		filter = bson.M{
+			"$or": []bson.M{
+				{"displayName": bson.M{"$regex": q, "$options": "i"}},
+				{"email": bson.M{"$regex": q, "$options": "i"}},
+			},
+		}
+	}
+	cursor, err := r.col.Find(ctx, filter, options.Find().SetLimit(limit).SetSort(bson.M{"createdAt": -1}))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	out := make([]models.User, 0)
+	for cursor.Next(ctx) {
+		var u models.User
+		if err := cursor.Decode(&u); err != nil {
+			return nil, err
+		}
+		out = append(out, u)
+	}
+	return out, cursor.Err()
+}
+
+func (r *UserRepository) UpdateProfile(ctx context.Context, userID string, displayName, avatarURL, coverURL string) error {
+	update := bson.M{"updatedAt": time.Now()}
+	if displayName != "" {
+		update["displayName"] = displayName
+	}
+	if avatarURL != "" {
+		update["avatarUrl"] = avatarURL
+	}
+	if coverURL != "" {
+		update["coverUrl"] = coverURL
+	}
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": toObjectID(userID)}, bson.M{"$set": update})
+	return err
+}
+
 func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
 	if user.ID.IsZero() {
 		user.ID = primitive.NewObjectID()
@@ -174,6 +258,29 @@ func (r *NewsRepository) ListPosts(ctx context.Context, page, limit int64) ([]mo
 		SetSkip(skip).SetLimit(limit)
 
 	cursor, err := r.postsCol.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	posts := make([]models.NewsPost, 0)
+	for cursor.Next(ctx) {
+		var p models.NewsPost
+		if err := cursor.Decode(&p); err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+	return posts, cursor.Err()
+}
+
+func (r *NewsRepository) ListPostsByUser(ctx context.Context, userID string, page, limit int64) ([]models.NewsPost, error) {
+	skip := (page - 1) * limit
+	opts := options.Find().
+		SetSort(bson.D{{Key: "createdAt", Value: -1}}).
+		SetSkip(skip).SetLimit(limit)
+
+	cursor, err := r.postsCol.Find(ctx, bson.M{"userId": userID}, opts)
 	if err != nil {
 		return nil, err
 	}

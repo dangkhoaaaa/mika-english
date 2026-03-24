@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"mika-english-backend/internal/models"
@@ -211,13 +212,70 @@ func fishOrderMap() map[string]int {
 }
 
 func sortCollectionItems(items []FishingCollectionItem) {
-	// simple bubble sort: small list
-	for i := 0; i < len(items); i++ {
-		for j := i + 1; j < len(items); j++ {
-			if items[j].BestOrder > items[i].BestOrder {
-				items[i], items[j] = items[j], items[i]
-			}
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].BestOrder == items[j].BestOrder {
+			return items[i].CatchCount > items[j].CatchCount
 		}
+		return items[i].BestOrder > items[j].BestOrder
+	})
+}
+
+type FishingTopUser struct {
+	UserID      string `json:"userId"`
+	TotalCatches int   `json:"totalCatches"`
+	TotalUnique int    `json:"totalUnique"`
+}
+
+func (r *FishingRepository) TopUsersByFishCount(ctx context.Context, limit int) ([]FishingTopUser, error) {
+	if limit <= 0 {
+		limit = 50
 	}
+	cursor, err := r.catchCol.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	type agg struct {
+		total int
+		uniq  map[string]struct{}
+	}
+	byUser := map[string]*agg{}
+
+	for cursor.Next(ctx) {
+		var c models.FishCatch
+		if err := cursor.Decode(&c); err != nil {
+			return nil, err
+		}
+		a, ok := byUser[c.UserID]
+		if !ok {
+			a = &agg{uniq: map[string]struct{}{}}
+			byUser[c.UserID] = a
+		}
+		a.total++
+		a.uniq[c.VocabularyID] = struct{}{}
+	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	out := make([]FishingTopUser, 0, len(byUser))
+	for uid, a := range byUser {
+		out = append(out, FishingTopUser{
+			UserID:      uid,
+			TotalCatches: a.total,
+			TotalUnique: len(a.uniq),
+		})
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].TotalCatches == out[j].TotalCatches {
+			return out[i].TotalUnique > out[j].TotalUnique
+		}
+		return out[i].TotalCatches > out[j].TotalCatches
+	})
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
 }
 

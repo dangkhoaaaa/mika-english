@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { api, setAuthToken } from "@/lib/api";
 import { clearSession, getAccessToken, getRefreshToken } from "@/lib/session";
+import { WakeupPing } from "@/components/infra/WakeupPing";
 
 const navItems = [
   { href: "/home", label: "Bảng tin", icon: "🏠" },
@@ -17,6 +18,9 @@ const navItems = [
   { href: "/motivation", label: "Động lực", icon: "⚡" },
   { href: "/fishing", label: "Câu cá", icon: "🎣" },
   { href: "/fish-collection", label: "Sưu tập cá", icon: "🦈" },
+  { href: "/leaderboard", label: "BXH", icon: "🏆" },
+  { href: "/profile", label: "Trang cá nhân", icon: "👤" },
+  { href: "/users", label: "Tìm user", icon: "🔎" },
   { href: "/saved", label: "Từ đã lưu", icon: "⭐" },
   { href: "/messages", label: "Tin nhắn", icon: "💬", soon: true },
 ] as const;
@@ -42,6 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#141414] text-white">
+      <WakeupPing />
       {/* Top bar — Facebook-like + Netflix tone */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#141414]/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-3 sm:px-4">

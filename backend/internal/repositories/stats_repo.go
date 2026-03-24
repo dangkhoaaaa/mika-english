@@ -115,3 +115,26 @@ func (r *StatsRepository) EnsureBase(ctx context.Context, userID string, now tim
 // Use this helper for any place where we need created object id.
 func newObjectID() primitive.ObjectID { return primitive.NewObjectID() }
 
+func (r *StatsRepository) TopByPoints(ctx context.Context, limit int64) ([]models.UserStats, error) {
+	if limit <= 0 {
+		limit = 50
+	}
+	cursor, err := r.col.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{
+		{Key: "points", Value: -1},
+		{Key: "updatedAt", Value: 1},
+	}).SetLimit(limit))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	out := make([]models.UserStats, 0)
+	for cursor.Next(ctx) {
+		var s models.UserStats
+		if err := cursor.Decode(&s); err != nil {
+			return nil, err
+		}
+		out = append(out, s)
+	}
+	return out, cursor.Err()
+}
+

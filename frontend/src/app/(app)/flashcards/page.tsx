@@ -2,7 +2,7 @@
 
 import { type ChangeEvent, useState } from "react";
 import { useDispatch } from "react-redux";
-import { importVocabularyBatch, setVocabularies } from "@/lib/features/vocabularySlice";
+import { setVocabularies } from "@/lib/features/vocabularySlice";
 import type { AppDispatch } from "@/lib/store";
 import { api, setAuthToken } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
@@ -22,6 +22,7 @@ export default function FlashcardsPage() {
   });
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [googleSheetUrl, setGoogleSheetUrl] = useState("");
 
   const load = async () => {
     const token = getAccessToken();
@@ -102,6 +103,55 @@ export default function FlashcardsPage() {
       setImportMsg("Lỗi đọc file Excel.");
     }
     e.target.value = "";
+  };
+
+  const sheetUrlToExportXlsx = (url: string): string | null => {
+    const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (!m) return null;
+    const id = m[1];
+    const gidMatch = url.match(/[?&#]gid=([0-9]+)/);
+    const gid = gidMatch?.[1];
+    if (gid) {
+      return `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx&gid=${gid}`;
+    }
+    return `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`;
+  };
+
+  const importFromGoogleSheet = async () => {
+    if (!googleSheetUrl.trim()) {
+      setImportMsg("Nhập link Google Sheets trước.");
+      return;
+    }
+    const exportUrl = sheetUrlToExportXlsx(googleSheetUrl.trim());
+    if (!exportUrl) {
+      setImportMsg("Link Google Sheets không hợp lệ.");
+      return;
+    }
+    setImportMsg("Đang tải Google Sheets…");
+    setSyncing(true);
+    try {
+      const res = await fetch(exportUrl);
+      if (!res.ok) throw new Error("fetch export failed");
+      const buffer = await res.arrayBuffer();
+      const parsed = parseVocabularyWorkbook(buffer);
+      if (parsed.length === 0) {
+        setImportMsg("Google Sheets không có dữ liệu hợp lệ.");
+        return;
+      }
+      const byTopic = new Map<string, number>();
+      parsed.forEach((r) => {
+        const t = r.topic || "Khác";
+        byTopic.set(t, (byTopic.get(t) ?? 0) + 1);
+      });
+      const summary = [...byTopic.entries()].map(([t, n]) => `${t}: ${n}`).join(" · ");
+      setImportMsg(`Đã đọc ${parsed.length} từ (${summary}). Đang đồng bộ…`);
+      await syncRowsToApi(parsed);
+    } catch (e) {
+      console.error(e);
+      setImportMsg("Import từ Google Sheets thất bại. Hãy kiểm tra sheet có public quyền xem.");
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const saveToApi = async () => {
@@ -202,6 +252,26 @@ export default function FlashcardsPage() {
               onChange={onImport}
             />
           </label>
+        </div>
+        <div className="mt-3 rounded-lg border border-white/10 bg-[#18191a] p-3">
+          <p className="mb-2 text-xs text-zinc-400">Import trực tiếp từ Google Sheets link</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              className="flex-1 rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm"
+              placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=..."
+              value={googleSheetUrl}
+              onChange={(e) => setGoogleSheetUrl(e.target.value)}
+            />
+            <button
+              type="button"
+              disabled={syncing}
+              className="rounded-lg bg-[#E50914] px-4 py-2 text-sm font-semibold hover:bg-[#f40612] disabled:opacity-50"
+              onClick={() => void importFromGoogleSheet()}
+            >
+              Import từ link
+            </button>
+          </div>
+          <p className="mt-2 text-[11px] text-zinc-500">Lưu ý: file Google Sheets cần quyền Anyone with the link can view.</p>
         </div>
         {importMsg && (
           <p className="mt-2 text-sm text-amber-200/90">{importMsg}</p>

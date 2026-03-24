@@ -22,6 +22,25 @@ type CollectionResponse = {
 
 const fishPretty = (t: string) => t;
 
+const rarityStyle = (t: string) => {
+  switch (t) {
+    case "SSS":
+      return "from-amber-300 via-yellow-200 to-orange-400 text-black border-yellow-200 shadow-[0_0_28px_rgba(251,191,36,0.45)]";
+    case "SS":
+      return "from-violet-400 via-fuchsia-300 to-indigo-400 text-white border-fuchsia-200 shadow-[0_0_22px_rgba(217,70,239,0.4)]";
+    case "S":
+      return "from-sky-400 via-blue-300 to-cyan-300 text-black border-cyan-100 shadow-[0_0_18px_rgba(56,189,248,0.35)]";
+    case "A":
+      return "from-emerald-400 via-lime-300 to-green-300 text-black border-lime-100";
+    case "B":
+      return "from-indigo-500 via-blue-500 to-sky-500 text-white border-blue-200";
+    case "C":
+      return "from-green-700 via-emerald-700 to-teal-700 text-white border-emerald-200";
+    default:
+      return "from-zinc-500 via-zinc-400 to-slate-400 text-white border-zinc-200";
+  }
+};
+
 export default function FishCollectionPage() {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<CollectionItem[]>([]);
@@ -30,6 +49,7 @@ export default function FishCollectionPage() {
     countsByType: Record<string, number>;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
 
   const load = async () => {
     const token = getAccessToken();
@@ -55,6 +75,24 @@ export default function FishCollectionPage() {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
   }, []);
+
+  const shareAchievement = async () => {
+    const token = getAccessToken();
+    if (!token) return;
+    setAuthToken(token);
+    if (!summary) return;
+    setSharing(true);
+    setError(null);
+    try {
+      const topType = Object.entries(summary.countsByType ?? {}).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "D";
+      const content = `🎣 Thành tựu câu cá của mình: ${summary.totalUnique} cá unique, ${Object.values(summary.countsByType ?? {}).reduce((a, b) => a + b, 0)} tổng cá. Rank cá nổi bật: ${topType}. Ai đua cùng không?`;
+      await api.post("/api/v1/news", { content });
+    } catch (e: any) {
+      setError(e?.response?.data?.error ?? "Share thất bại.");
+    } finally {
+      setSharing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -85,6 +123,14 @@ export default function FishCollectionPage() {
                 </span>
               ))}
           </div>
+          <button
+            type="button"
+            disabled={sharing}
+            onClick={() => void shareAchievement()}
+            className="mt-3 rounded-lg bg-[#E50914] px-4 py-2 text-sm font-semibold text-white hover:bg-[#f40612] disabled:opacity-50"
+          >
+            {sharing ? "Đang chia sẻ..." : "Chia sẻ thành tựu lên Home"}
+          </button>
         </section>
       ) : null}
 
@@ -94,29 +140,31 @@ export default function FishCollectionPage() {
         </div>
       ) : null}
 
-      <section className="space-y-2">
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.length === 0 ? (
-          <div className="rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">
+          <div className="col-span-full rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">
             Chưa có cá nào. Vào <strong className="text-white">Câu cá</strong> để câu thử.
           </div>
         ) : (
           items.map((it) => (
             <article
               key={it.vocabularyId}
-              className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-white/10 bg-[#242526] p-4"
+              className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-4 ${rarityStyle(it.bestFishType)}`}
             >
-              <div className="min-w-[240px] flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-[#E50914]/20 px-2 py-0.5 text-xs text-[#E50914]">{it.topic}</span>
-                  <span className="rounded-full bg-amber-900/20 px-2 py-0.5 text-xs text-amber-200">
+              <div className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 rounded-full bg-white/20 blur-xl" />
+              <div className="relative min-w-[240px] flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="rounded bg-black/25 px-2 py-0.5 text-xs text-white/95">{it.topic}</span>
+                  <span className="rounded-full border border-white/40 bg-black/20 px-2 py-0.5 text-xs font-semibold">
                     {fishPretty(it.bestFishType)}
                   </span>
                 </div>
-                <div className="mt-2 font-semibold text-white">{it.vocabularyValue}</div>
-                <div className="text-sm text-zinc-400">{it.vocabularyMeaning}</div>
-              </div>
-              <div className="shrink-0 rounded-lg border border-white/20 bg-[#18191a] px-3 py-2 text-sm text-zinc-200">
-                Lần câu: <strong className="text-white">{it.catchCount}</strong>
+                <div className="mt-3 text-xl font-bold tracking-tight">{it.vocabularyValue}</div>
+                <div className="text-sm opacity-95">{it.vocabularyMeaning}</div>
+                <div className="mt-4 flex items-center justify-between rounded-lg bg-black/20 px-3 py-2 text-sm">
+                  <span>Lần câu</span>
+                  <strong>{it.catchCount}</strong>
+                </div>
               </div>
             </article>
           ))

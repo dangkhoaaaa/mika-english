@@ -40,6 +40,7 @@ type User struct {
 	PasswordHash string    `bson:"passwordHash,omitempty" json:"-"`
 	DisplayName  string    `bson:"displayName" json:"displayName"`
 	AvatarURL    string    `bson:"avatarUrl,omitempty" json:"avatarUrl,omitempty"`
+	CoverURL     string    `bson:"coverUrl,omitempty" json:"coverUrl,omitempty"`
 	Provider     string    `bson:"provider" json:"provider"`
 	CreatedAt    time.Time `bson:"createdAt" json:"createdAt"`
 }
@@ -48,6 +49,7 @@ type NewsPost struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	UserID    string    `bson:"userId" json:"userId"`
 	Content   string    `bson:"content" json:"content"`
+	ImageURL  string    `bson:"imageUrl,omitempty" json:"imageUrl,omitempty"`
 	Likes     int64     `bson:"likes" json:"likes"`
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 }

@@ -66,6 +66,8 @@ func NewRouter() http.Handler {
 	fishingService := services.NewFishingService(vocabRepo, fishingRepo, statsService)
 	vocabImportService := services.NewVocabularyImportService(vocabRepo, bookmarkRepo, reminderRepo)
 	newsService := services.NewNewsService(newsRepo)
+	leaderboardService := services.NewLeaderboardService(statsRepo, fishingRepo, userRepo)
+	profileService := services.NewProfileService(userRepo, statsRepo, newsRepo, fishingRepo)
 
 	go func() {
 		ticker := time.NewTicker(1 * time.Minute)
@@ -90,6 +92,9 @@ func NewRouter() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	})
+	mux.HandleFunc("/api/v1/wakeup", func(w http.ResponseWriter, _ *http.Request) {
+		writeJSON(w, http.StatusOK, map[string]any{"ok": true, "message": "wake"})
 	})
 
 	mux.HandleFunc("/api/v1/auth/register", func(w http.ResponseWriter, r *http.Request) {
@@ -578,6 +583,98 @@ func NewRouter() http.Handler {
 			return
 		}
 		writeJSON(w, http.StatusOK, resp)
+	}))
+
+	mux.HandleFunc("/api/v1/leaderboard", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		topPoints, err := leaderboardService.TopPoints(r.Context(), 50)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		topFish, err := leaderboardService.TopFish(r.Context(), 50)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"topPoints": topPoints,
+			"topFish":   topFish,
+		})
+	}))
+
+	mux.HandleFunc("/api/v1/profile/me", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		uid := getUserID(r.Context())
+		switch r.Method {
+		case http.MethodGet:
+			resp, err := profileService.Me(r.Context(), uid)
+			if err != nil {
+				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+				return
+			}
+			writeJSON(w, http.StatusOK, resp)
+		case http.MethodPut:
+			var req struct {
+				DisplayName string `json:"displayName"`
+				AvatarURL   string `json:"avatarUrl"`
+				CoverURL    string `json:"coverUrl"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid payload"})
+				return
+			}
+			if err := profileService.UpdateMe(r.Context(), uid, strings.TrimSpace(req.DisplayName), strings.TrimSpace(req.AvatarURL), strings.TrimSpace(req.CoverURL)); err != nil {
+				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+				return
+			}
+			resp, err := profileService.Me(r.Context(), uid)
+			if err != nil {
+				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+				return
+			}
+			writeJSON(w, http.StatusOK, resp)
+		default:
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+		}
+	}))
+
+	mux.HandleFunc("/api/v1/profile/user", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		userID := r.URL.Query().Get("userId")
+		if userID == "" {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "missing userId"})
+			return
+		}
+		resp, err := profileService.ByUserID(r.Context(), userID)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		writeJSON(w, http.StatusOK, resp)
+	}))
+
+	mux.HandleFunc("/api/v1/users/search", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		q := strings.TrimSpace(r.URL.Query().Get("q"))
+		limit, _ := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
+		if limit <= 0 || limit > 50 {
+			limit = 20
+		}
+		users, err := profileService.SearchUsers(r.Context(), q, limit)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		writeJSON(w, http.StatusOK, users)
 	}))
 
 	mux.HandleFunc("/api/v1/news", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {

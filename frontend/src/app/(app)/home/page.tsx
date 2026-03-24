@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { api, setAuthToken } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 interface NewsItem {
   id: string;
   content: string;
+  imageUrl?: string;
   likes: number;
   userId?: string;
 }
@@ -14,6 +16,8 @@ interface NewsItem {
 export default function HomePage() {
   const [posts, setPosts] = useState<NewsItem[]>([]);
   const [content, setContent] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [posting, setPosting] = useState(false);
   const [postComments, setPostComments] = useState<Record<string, Array<{ id: string; content: string }>>>({});
   const [commentDraft, setCommentDraft] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -107,15 +111,37 @@ export default function HomePage() {
             className="rounded-lg bg-[#E50914] px-6 py-2 text-sm font-semibold text-white hover:bg-[#f40612]"
             onClick={() =>
               void (async () => {
-                if (!content.trim()) return;
-                await api.post("/api/v1/news", { content });
-                setContent("");
-                await loadPosts();
+                if (!content.trim() && !imageFile) return;
+                setPosting(true);
+                try {
+                  let imageUrl = "";
+                  if (imageFile) {
+                    imageUrl = await uploadImageToCloudinary(imageFile);
+                  }
+                  await api.post("/api/v1/news", { content, imageUrl });
+                  setContent("");
+                  setImageFile(null);
+                  await loadPosts();
+                } finally {
+                  setPosting(false);
+                }
               })()
             }
           >
-            Đăng
+            {posting ? "Đang đăng..." : "Đăng"}
           </button>
+        </div>
+        <div className="mt-2 flex items-center gap-2">
+          <label className="cursor-pointer rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5">
+            Ảnh đính kèm
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            />
+          </label>
+          {imageFile ? <span className="text-xs text-zinc-500">{imageFile.name}</span> : null}
         </div>
       </section>
 
@@ -141,6 +167,11 @@ export default function HomePage() {
               </div>
             </div>
             <p className="px-4 pb-3 text-[15px] leading-relaxed text-zinc-100">{post.content}</p>
+            {post.imageUrl ? (
+              <div className="px-4 pb-3">
+                <img src={post.imageUrl} alt="post" className="max-h-96 w-full rounded-lg object-cover" />
+              </div>
+            ) : null}
             <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-sm text-zinc-400">
               <span>{post.likes} lượt thích</span>
             </div>
