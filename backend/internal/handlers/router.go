@@ -89,6 +89,16 @@ func NewRouter() http.Handler {
 		}
 	}()
 
+	// Render free ngủ khi không có request đủ lâu.
+	// Tự "wake up" bằng cách gọi chính nó định kỳ (~14 phút) khi server vẫn đang chạy.
+	go func() {
+		ticker := time.NewTicker(14 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			_, _ = http.Get("https://mika-english.onrender.com/api/v1/wakeup")
+		}
+	}()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
@@ -694,7 +704,56 @@ func NewRouter() http.Handler {
 				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 				return
 			}
-			writeJSON(w, http.StatusOK, posts)
+			// Join user info for author avatar/name.
+			type userMini struct {
+				ID          string `json:"id"`
+				DisplayName string `json:"displayName"`
+				AvatarURL   string `json:"avatarUrl,omitempty"`
+			}
+			type postResp struct {
+				ID        string    `json:"id"`
+				UserID    string    `json:"userId"`
+				Content   string    `json:"content"`
+				Likes     int64     `json:"likes"`
+				CreatedAt time.Time `json:"createdAt"`
+				ImageURL  string   `json:"imageUrl,omitempty"`
+				User      userMini  `json:"user"`
+			}
+
+			uidsSet := map[string]struct{}{}
+			for _, p := range posts {
+				if p.UserID != "" {
+					uidsSet[p.UserID] = struct{}{}
+				}
+			}
+			uids := make([]string, 0, len(uidsSet))
+			for id := range uidsSet {
+				uids = append(uids, id)
+			}
+			users, _ := userRepo.ListByIDs(r.Context(), uids)
+			userMap := map[string]models.User{}
+			for _, u := range users {
+				userMap[u.ID.Hex()] = u
+			}
+
+			out := make([]postResp, 0, len(posts))
+			for _, p := range posts {
+				u := userMap[p.UserID]
+				out = append(out, postResp{
+					ID:          p.ID.Hex(),
+					UserID:     p.UserID,
+					Content:    p.Content,
+					Likes:      p.Likes,
+					CreatedAt:  p.CreatedAt,
+					ImageURL:   p.ImageURL,
+					User: userMini{
+						ID:           u.ID.Hex(),
+						DisplayName: u.DisplayName,
+						AvatarURL:   u.AvatarURL,
+					},
+				})
+			}
+			writeJSON(w, http.StatusOK, out)
 		case http.MethodPost:
 			var post models.NewsPost
 			if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
@@ -711,6 +770,30 @@ func NewRouter() http.Handler {
 			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
 		}
 	}))
+
+	mux.HandleFunc("/api/v1/news/delete", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		userID := getUserID(r.Context())
+		postID := r.URL.Query().Get("postId")
+		if postID == "" {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "missing postId"})
+			return
+		}
+		ok, err := newsService.DeletePost(r.Context(), userID, postID)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		if !ok {
+			writeJSON(w, http.StatusNotFound, map[string]string{"error": "post not found"})
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]string{"message": "deleted"})
+	}))
+
 	mux.HandleFunc("/api/v1/news/like", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
@@ -762,7 +845,54 @@ func NewRouter() http.Handler {
 			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 			return
 		}
-		writeJSON(w, http.StatusOK, items)
+		// Join user info for comment authors.
+		type userMini struct {
+			ID           string `json:"id"`
+			DisplayName string `json:"displayName"`
+			AvatarURL   string `json:"avatarUrl,omitempty"`
+		}
+		type commentResp struct {
+			ID        string    `json:"id"`
+			PostID    string    `json:"postId"`
+			UserID    string    `json:"userId"`
+			Content   string    `json:"content"`
+			CreatedAt time.Time `json:"createdAt"`
+			User      userMini `json:"user"`
+		}
+
+		uidsSet := map[string]struct{}{}
+		for _, c := range items {
+			if c.UserID != "" {
+				uidsSet[c.UserID] = struct{}{}
+			}
+		}
+		uids := make([]string, 0, len(uidsSet))
+		for id := range uidsSet {
+			uids = append(uids, id)
+		}
+		users, _ := userRepo.ListByIDs(r.Context(), uids)
+		userMap := map[string]models.User{}
+		for _, u := range users {
+			userMap[u.ID.Hex()] = u
+		}
+
+		out := make([]commentResp, 0, len(items))
+		for _, c := range items {
+			u := userMap[c.UserID]
+			out = append(out, commentResp{
+				ID:        c.ID.Hex(),
+				PostID:    c.PostID,
+				UserID:    c.UserID,
+				Content:   c.Content,
+				CreatedAt: c.CreatedAt,
+				User: userMini{
+					ID:           u.ID.Hex(),
+					DisplayName: u.DisplayName,
+					AvatarURL:   u.AvatarURL,
+				},
+			})
+		}
+		writeJSON(w, http.StatusOK, out)
 	}))
 	mux.HandleFunc("/api/v1/news/save-word", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api, setAuthToken } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
+import Link from "next/link";
 
 type Row = {
   userId: string;
@@ -12,6 +13,33 @@ type Row = {
   points?: number;
   totalCatches?: number;
   totalUnique?: number;
+};
+
+const rankMilestones = [
+  { name: "Đồng III", min: 0, color: "text-zinc-300" },
+  { name: "Đồng II", min: 66, color: "text-zinc-300" },
+  { name: "Đồng I", min: 132, color: "text-zinc-300" },
+  { name: "Bạc III", min: 200, color: "text-slate-200" },
+  { name: "Bạc II", min: 300, color: "text-slate-200" },
+  { name: "Bạc I", min: 400, color: "text-slate-200" },
+  { name: "Vàng III", min: 500, color: "text-amber-300" },
+  { name: "Vàng II", min: 666, color: "text-amber-300" },
+  { name: "Vàng I", min: 832, color: "text-amber-300" },
+  { name: "Bạch kim III", min: 1000, color: "text-cyan-300" },
+  { name: "Bạch kim II", min: 1333, color: "text-cyan-300" },
+  { name: "Bạch kim I", min: 1666, color: "text-cyan-300" },
+  { name: "Kim cương III", min: 2000, color: "text-indigo-300" },
+  { name: "Kim cương II", min: 2666, color: "text-indigo-300" },
+  { name: "Kim cương I", min: 3332, color: "text-indigo-300" },
+  { name: "Cao thủ III", min: 4000, color: "text-fuchsia-300" },
+  { name: "Cao thủ II", min: 4333, color: "text-fuchsia-300" },
+  { name: "Cao thủ I", min: 4666, color: "text-fuchsia-300" },
+] as const;
+
+const rankFromPoints = (points?: number) => {
+  const p = Number(points ?? 0);
+  const sorted = [...rankMilestones].sort((a, b) => a.min - b.min);
+  return sorted.filter((r) => r.min <= p).slice(-1)[0] ?? sorted[0];
 };
 
 export default function LeaderboardPage() {
@@ -113,14 +141,32 @@ export default function LeaderboardPage() {
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <div className={`w-8 text-center font-bold ${idx < 3 ? "text-amber-300" : "text-zinc-400"}`}>#{idx + 1}</div>
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-white">{r.displayName || `user_${r.userId.slice(0, 6)}`}</p>
-                    {tab === "points" ? (
-                      <p className="text-xs text-zinc-500">Rank: {r.rank || "Đồng"}</p>
-                    ) : (
-                      <p className="text-xs text-zinc-500">Cá unique: {r.totalUnique ?? 0}</p>
-                    )}
-                  </div>
+                  <Link
+                    href={`/profile/${encodeURIComponent(r.userId)}`}
+                    className="flex min-w-0 items-center gap-3"
+                  >
+                    <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#18191a]">
+                      {r.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={r.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xs font-bold text-zinc-300">
+                          {r.displayName?.slice(0, 1)?.toUpperCase() ?? "U"}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-white">{r.displayName || `user_${r.userId.slice(0, 6)}`}</p>
+                      {tab === "points" ? (
+                        <p className="text-xs text-zinc-500">
+                          Rank:{" "}
+                          <span className={rankFromPoints(r.points).color}>{rankFromPoints(r.points).name}</span>
+                        </p>
+                      ) : (
+                        <p className="text-xs text-zinc-500">Cá unique: {r.totalUnique ?? 0}</p>
+                      )}
+                    </div>
+                  </Link>
                 </div>
                 <div className="text-right">
                   {tab === "points" ? (

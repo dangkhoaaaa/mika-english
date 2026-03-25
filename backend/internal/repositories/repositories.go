@@ -335,6 +335,16 @@ func (r *NewsRepository) SaveWord(ctx context.Context, item *models.SavedWord) e
 	return err
 }
 
+func (r *NewsRepository) DeletePostByIDAndUser(ctx context.Context, userID string, postID string) (bool, error) {
+	res, err := r.postsCol.DeleteOne(ctx, bson.M{"_id": toObjectID(postID), "userId": userID})
+	if err != nil {
+		return false, err
+	}
+	// dọn comments liên quan để không bị mồ côi.
+	_, _ = r.commentsCol.DeleteMany(ctx, bson.M{"postId": postID})
+	return res.DeletedCount > 0, nil
+}
+
 func toObjectID(id string) any {
 	oid, err := primitiveObjectIDFromHex(id)
 	if err != nil {

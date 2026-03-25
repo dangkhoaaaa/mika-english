@@ -38,3 +38,7 @@ func (s *NewsService) ListCommentsByPost(ctx context.Context, postID string) ([]
 func (s *NewsService) SaveWord(ctx context.Context, item *models.SavedWord) error {
 	return s.repo.SaveWord(ctx, item)
 }
+
+func (s *NewsService) DeletePost(ctx context.Context, userID string, postID string) (bool, error) {
+	return s.repo.DeletePostByIDAndUser(ctx, userID, postID)
+}

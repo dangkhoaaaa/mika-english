@@ -23,6 +23,10 @@ export default function FlashcardsPage() {
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [googleSheetUrl, setGoogleSheetUrl] = useState("");
+  const [downloadingSample, setDownloadingSample] = useState(false);
+
+  const sampleGoogleSheetUrl =
+    "https://docs.google.com/spreadsheets/d/1bBZ-s5hLmk6KYcfnhwyp0cb9JD1ui1WielZ5CPkFVdc/edit?gid=519826982#gid=519826982";
 
   const load = async () => {
     const token = getAccessToken();
@@ -253,6 +257,71 @@ export default function FlashcardsPage() {
             />
           </label>
         </div>
+
+        <div className="mt-4 rounded-lg border border-white/10 bg-[#18191a] p-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-white">Sample Excel (mẫu để import)</p>
+              <p className="mt-1 text-[11px] text-zinc-500">
+                Link Google Sheets:{" "}
+                <a
+                  href={sampleGoogleSheetUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  mở xem mẫu
+                </a>
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={syncing || downloadingSample}
+              className="rounded-lg bg-[#E50914] px-4 py-2 text-sm font-semibold text-white hover:bg-[#f40612] disabled:opacity-50"
+              onClick={async () => {
+                const exportUrl = sheetUrlToExportXlsx(sampleGoogleSheetUrl);
+                if (!exportUrl) {
+                  setImportMsg("Link sample không hợp lệ.");
+                  return;
+                }
+                setDownloadingSample(true);
+                setImportMsg(null);
+                try {
+                  const res = await fetch(exportUrl);
+                  if (!res.ok) throw new Error("fetch sample failed");
+                  const blob = await res.blob();
+                  const objectUrl = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = objectUrl;
+                  a.download = "mika-english-sample.xlsx";
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  URL.revokeObjectURL(objectUrl);
+                  setImportMsg("Đã tải sample Excel.");
+                } catch (e) {
+                  console.error(e);
+                  setImportMsg("Tải sample thất bại (kiểm tra quyền xem link).");
+                } finally {
+                  setDownloadingSample(false);
+                }
+              }}
+            >
+              {downloadingSample ? "Đang tải..." : "Tải sample Excel"}
+            </button>
+          </div>
+
+          <div className="mt-3">
+            <p className="text-[11px] text-zinc-400">Rule Excel (đúng theo parser hiện tại):</p>
+            <ul className="mt-1 list-disc pl-5 text-[11px] text-zinc-500">
+              <li>Mỗi sheet tương ứng 1 <strong>topic</strong>; tên sheet sẽ là `topic`.</li>
+              <li>Dòng header cần có cột <strong>Vocabulary</strong> và <strong>Meaning</strong> (có thể đặt tên gần đúng như “Vocab / Từ” và “Meaning / Nghĩa”).</li>
+              <li>Optional: <strong>POS</strong>, <strong>Class</strong>, <strong>Example</strong>.</li>
+              <li>Hệ thống sẽ match theo normalize (không phân biệt dấu / hoa-thường / khoảng trắng).</li>
+            </ul>
+          </div>
+        </div>
+
         <div className="mt-3 rounded-lg border border-white/10 bg-[#18191a] p-3">
           <p className="mb-2 text-xs text-zinc-400">Import trực tiếp từ Google Sheets link</p>
           <div className="flex flex-col gap-2 sm:flex-row">

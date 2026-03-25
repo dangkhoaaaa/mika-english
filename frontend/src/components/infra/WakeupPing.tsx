@@ -21,6 +21,13 @@ export function WakeupPing() {
     // ping ngay khi mount
     ping();
 
+    // Wake-up định kỳ (khi user vẫn đang mở web):
+    // - render free hay ngủ khi không có request lâu
+    // - nếu FE còn chạy thì mình gọi wake-up mỗi 15 phút để giảm thời gian chờ
+    const timer = window.setInterval(() => {
+      ping();
+    }, 15 * 60 * 1000);
+
     const onVisible = () => {
       if (document.visibilityState === "visible") ping();
     };
@@ -29,6 +36,7 @@ export function WakeupPing() {
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("focus", onFocus);
     return () => {
+      window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", onFocus);
     };

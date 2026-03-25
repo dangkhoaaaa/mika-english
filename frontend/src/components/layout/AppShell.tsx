@@ -6,24 +6,48 @@ import { useState } from "react";
 import { api, setAuthToken } from "@/lib/api";
 import { clearSession, getAccessToken, getRefreshToken } from "@/lib/session";
 import { WakeupPing } from "@/components/infra/WakeupPing";
+import type { ReactNode } from "react";
+import {
+  FaHome,
+  FaFileImport,
+  FaBook,
+  FaPlus,
+  FaGamepad,
+  FaBrain,
+  FaCheckCircle,
+  FaBolt,
+  FaFish,
+  FaStar,
+  FaComments,
+  FaTrophy,
+  FaUser,
+  FaSearch,
+} from "react-icons/fa";
 
-const navItems = [
-  { href: "/home", label: "Bảng tin", icon: "🏠" },
-  { href: "/excel", label: "Import Excel", icon: "📊" },
-  { href: "/vocabulary", label: "Từ vựng", icon: "📚" },
-  { href: "/flashcards", label: "Thêm từ / Import", icon: "➕" },
-  { href: "/study", label: "Học thẻ", icon: "🃏" },
-  { href: "/quiz", label: "Quiz topic", icon: "🧠" },
-  { href: "/checkin", label: "Điểm danh", icon: "✅" },
-  { href: "/motivation", label: "Động lực", icon: "⚡" },
-  { href: "/fishing", label: "Câu cá", icon: "🎣" },
-  { href: "/fish-collection", label: "Sưu tập cá", icon: "🦈" },
-  { href: "/leaderboard", label: "BXH", icon: "🏆" },
-  { href: "/profile", label: "Trang cá nhân", icon: "👤" },
-  { href: "/users", label: "Tìm user", icon: "🔎" },
-  { href: "/saved", label: "Từ đã lưu", icon: "⭐" },
-  { href: "/messages", label: "Tin nhắn", icon: "💬", soon: true },
-] as const;
+type NavItem = {
+  href: string;
+  label: string;
+  icon: ReactNode;
+  soon?: boolean;
+};
+
+const navItems: NavItem[] = [
+  { href: "/home", label: "Bảng tin", icon: <FaHome /> },
+  { href: "/excel", label: "Import Excel", icon: <FaFileImport /> },
+  { href: "/vocabulary", label: "Từ vựng", icon: <FaBook /> },
+  { href: "/flashcards", label: "Thêm từ / Import", icon: <FaPlus /> },
+  { href: "/study", label: "Học thẻ", icon: <FaGamepad /> },
+  { href: "/quiz", label: "Quiz topic", icon: <FaBrain /> },
+  { href: "/checkin", label: "Điểm danh", icon: <FaCheckCircle /> },
+  { href: "/motivation", label: "Động lực", icon: <FaBolt /> },
+  { href: "/fishing", label: "Câu cá", icon: <FaFish /> },
+  { href: "/fish-collection", label: "Sưu tập cá", icon: <FaStar /> },
+  { href: "/leaderboard", label: "BXH", icon: <FaTrophy /> },
+  { href: "/profile", label: "Trang cá nhân", icon: <FaUser /> },
+  { href: "/users", label: "Tìm user", icon: <FaSearch /> },
+  { href: "/saved", label: "Từ đã lưu", icon: <FaStar /> },
+  { href: "/messages", label: "Tin nhắn", icon: <FaComments />, soon: true },
+];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -93,15 +117,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               return (
                 <Link
                   key={item.href}
-                  href={"soon" in item && item.soon ? "#" : item.href}
-                  onClick={(e) => "soon" in item && item.soon && e.preventDefault()}
+                  href={item.soon ? "#" : item.href}
+                  onClick={(e) => item.soon && e.preventDefault()}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
                     active ? "bg-white/10 text-white" : "text-zinc-400 hover:bg-white/5 hover:text-white"
-                  } ${"soon" in item && item.soon ? "cursor-not-allowed opacity-60" : ""}`}
+                  } ${item.soon ? "cursor-not-allowed opacity-60" : ""}`}
                 >
                   <span className="text-lg">{item.icon}</span>
                   <span>{item.label}</span>
-                  {"soon" in item && item.soon ? (
+                  {item.soon ? (
                     <span className="ml-auto rounded bg-[#E50914]/20 px-1.5 text-[10px] text-[#E50914]">Soon</span>
                   ) : null}
                 </Link>
@@ -141,18 +165,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {navItems.map((item) => (
                 <Link
                   key={item.href}
-                  href={"soon" in item && item.soon ? "#" : item.href}
+                  href={item.soon ? "#" : item.href}
                   onClick={(e) => {
-                    if ("soon" in item && item.soon) e.preventDefault();
+                    if (item.soon) e.preventDefault();
                     else setOpen(false);
                   }}
                   className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm ${
                     pathname === item.href ? "bg-white/10" : "hover:bg-white/5"
-                  } ${"soon" in item && item.soon ? "cursor-not-allowed opacity-60" : ""}`}
+                  } ${item.soon ? "cursor-not-allowed opacity-60" : ""}`}
                 >
                   <span>{item.icon}</span>
                   {item.label}
-                  {"soon" in item && item.soon ? (
+                  {item.soon ? (
                     <span className="ml-auto text-[10px] text-[#E50914]">Soon</span>
                   ) : null}
                 </Link>

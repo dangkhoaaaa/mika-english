@@ -41,9 +41,29 @@ const rarityStyle = (t: string) => {
   }
 };
 
+const rarityTextStyle = (t: string) => {
+  switch (t) {
+    case "SSS":
+      return "text-amber-50 drop-shadow-[0_0_12px_rgba(251,191,36,0.95)]";
+    case "SS":
+      return "text-fuchsia-50 drop-shadow-[0_0_12px_rgba(217,70,239,0.9)]";
+    case "S":
+      return "text-sky-900 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]";
+    case "A":
+      return "text-emerald-950 drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]";
+    case "B":
+      return "text-sky-50 drop-shadow-[0_0_12px_rgba(59,130,246,0.85)]";
+    case "C":
+      return "text-emerald-50 drop-shadow-[0_0_12px_rgba(16,185,129,0.75)]";
+    default:
+      return "text-zinc-50 drop-shadow-[0_0_10px_rgba(255,255,255,0.45)]";
+  }
+};
+
 export default function FishCollectionPage() {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<CollectionItem[]>([]);
+  const [filterType, setFilterType] = useState<string>("ALL");
   const [summary, setSummary] = useState<{
     totalUnique: number;
     countsByType: Record<string, number>;
@@ -140,23 +160,66 @@ export default function FishCollectionPage() {
         </div>
       ) : null}
 
+      <section className="mb-4 rounded-xl border border-white/10 bg-[#242526] p-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-white">Lọc cá theo cấp</p>
+            <p className="text-xs text-zinc-500">D / C / B / A / S / SS / SSS</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+            >
+              <option value="ALL">Tất cả</option>
+              <option value="D">D</option>
+              <option value="C">C</option>
+              <option value="B">B</option>
+              <option value="A">A</option>
+              <option value="S">S</option>
+              <option value="SS">SS</option>
+              <option value="SSS">SSS</option>
+            </select>
+            <button
+              type="button"
+              className="rounded-lg border border-white/20 bg-[#18191a] px-3 py-2 text-sm text-zinc-200 hover:bg-white/5"
+              onClick={() => setFilterType("ALL")}
+              disabled={filterType === "ALL"}
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.length === 0 ? (
           <div className="col-span-full rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">
             Chưa có cá nào. Vào <strong className="text-white">Câu cá</strong> để câu thử.
           </div>
+        ) : items.filter((it) => filterType === "ALL" || it.bestFishType === filterType).length === 0 ? (
+          <div className="col-span-full rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">
+            Chưa có cá cấp <strong className="text-white">{filterType}</strong>.
+          </div>
         ) : (
-          items.map((it) => (
+          items
+            .filter((it) => filterType === "ALL" || it.bestFishType === filterType)
+            .map((it) => (
             <article
               key={it.vocabularyId}
               className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-4 ${rarityStyle(it.bestFishType)}`}
             >
               <div className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 rounded-full bg-white/20 blur-xl" />
+              {/* watermark rank — giữa tay phải */}
+              <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 select-none text-6xl font-black opacity-20">
+                {fishPretty(it.bestFishType)}
+              </div>
               <div className="relative min-w-[240px] flex-1">
                 <div className="flex items-center justify-between">
                   <span className="rounded bg-black/25 px-2 py-0.5 text-xs text-white/95">{it.topic}</span>
-                  <span className="rounded-full border border-white/40 bg-black/20 px-2 py-0.5 text-xs font-semibold">
-                    {fishPretty(it.bestFishType)}
+                  <span className={`rounded-full border border-white/40 bg-black/25 px-2 py-0.5 text-xs font-semibold ${rarityTextStyle(it.bestFishType)}`}>
+                    Rank {fishPretty(it.bestFishType)}
                   </span>
                 </div>
                 <div className="mt-3 text-xl font-bold tracking-tight">{it.vocabularyValue}</div>
@@ -167,7 +230,7 @@ export default function FishCollectionPage() {
                 </div>
               </div>
             </article>
-          ))
+            ))
         )}
       </section>
     </div>

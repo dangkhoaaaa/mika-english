@@ -4,21 +4,41 @@ import { useEffect, useState } from "react";
 import { api, setAuthToken } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import Link from "next/link";
+import { FaBookmark, FaCommentDots, FaTrash, FaThumbsUp } from "react-icons/fa";
+
+type UserMini = {
+  id: string;
+  displayName: string;
+  avatarUrl?: string;
+};
 
 interface NewsItem {
   id: string;
   content: string;
   imageUrl?: string;
   likes: number;
-  userId?: string;
+  userId: string;
+  createdAt?: string;
+  user: UserMini;
 }
+
+type CommentItem = {
+  id: string;
+  postId: string;
+  userId: string;
+  content: string;
+  createdAt?: string;
+  user: UserMini;
+};
 
 export default function HomePage() {
   const [posts, setPosts] = useState<NewsItem[]>([]);
   const [content, setContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [posting, setPosting] = useState(false);
-  const [postComments, setPostComments] = useState<Record<string, Array<{ id: string; content: string }>>>({});
+  const [postComments, setPostComments] = useState<Record<string, CommentItem[]>>({});
   const [commentDraft, setCommentDraft] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [fishAchievements, setFishAchievements] = useState<{
@@ -27,6 +47,23 @@ export default function HomePage() {
     countsByType: Record<string, number>;
     lastCaughtAt?: string;
   } | null>(null);
+  const [meUserId, setMeUserId] = useState<string>("");
+
+  const timeAgo = (iso?: string) => {
+    if (!iso) return "";
+    const t = new Date(iso).getTime();
+    if (!Number.isFinite(t)) return "";
+    const diffSec = Math.max(0, Math.floor((Date.now() - t) / 1000));
+    if (diffSec < 10) return "vừa xong";
+    if (diffSec < 60) return `${diffSec} giây`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} phút`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `${diffH} giờ`;
+    const diffD = Math.floor(diffH / 24);
+    if (diffD < 7) return `${diffD} ngày`;
+    return new Date(iso).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" });
+  };
 
   const loadPosts = async () => {
     const token = getAccessToken();
@@ -53,6 +90,18 @@ export default function HomePage() {
       if (!token) return;
       setAuthToken(token);
       try {
+        const res = await api.get("/api/v1/profile/me");
+        const u = res.data?.user;
+        if (u?.id) setMeUserId(String(u.id));
+      } catch {
+        /* ignore */
+      }
+    })();
+    void (async () => {
+      const token = getAccessToken();
+      if (!token) return;
+      setAuthToken(token);
+      try {
         const res = await api.get("/api/v1/fishing/achievements");
         setFishAchievements(res.data ?? null);
       } catch {
@@ -60,6 +109,54 @@ export default function HomePage() {
       }
     })();
   }, []);
+
+  const postText = async () => {
+    if (!content.trim()) return;
+    setPosting(true);
+    try {
+      await api.post("/api/v1/news", { content: content.trim() });
+      setContent("");
+      setImageFile(null);
+      await loadPosts();
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const postWithImage = async () => {
+    if (!imageFile) return;
+    setPosting(true);
+    try {
+      const imageUrl = await uploadImageToCloudinary(imageFile);
+      await api.post("/api/v1/news", { content: content.trim(), imageUrl });
+      setContent("");
+      setImageFile(null);
+      await loadPosts();
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const deletePost = async (postId: string) => {
+    try {
+      await api.delete(`/api/v1/news/delete?postId=${encodeURIComponent(postId)}`);
+      await loadPosts();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(imageFile);
+    setImagePreviewUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [imageFile]);
 
   return (
     <div className="mx-auto max-w-2xl px-3 py-4 pb-12 sm:px-4">
@@ -105,34 +202,26 @@ export default function HomePage() {
             onChange={(e) => setContent(e.target.value)}
           />
         </div>
-        <div className="flex justify-end border-t border-white/10 pt-3">
+        <div className="flex items-center justify-end gap-2 border-t border-white/10 pt-3">
           <button
             type="button"
-            className="rounded-lg bg-[#E50914] px-6 py-2 text-sm font-semibold text-white hover:bg-[#f40612]"
-            onClick={() =>
-              void (async () => {
-                if (!content.trim() && !imageFile) return;
-                setPosting(true);
-                try {
-                  let imageUrl = "";
-                  if (imageFile) {
-                    imageUrl = await uploadImageToCloudinary(imageFile);
-                  }
-                  await api.post("/api/v1/news", { content, imageUrl });
-                  setContent("");
-                  setImageFile(null);
-                  await loadPosts();
-                } finally {
-                  setPosting(false);
-                }
-              })()
-            }
+            disabled={posting || !content.trim()}
+            className="rounded-lg bg-white/5 px-5 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => void postText()}
           >
             {posting ? "Đang đăng..." : "Đăng"}
           </button>
+          <button
+            type="button"
+            disabled={posting || !imageFile}
+            className="rounded-lg bg-[#E50914] px-5 py-2 text-sm font-semibold text-white hover:bg-[#f40612] disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => void postWithImage()}
+          >
+            {posting ? "Đang đăng..." : "Đăng kèm ảnh"}
+          </button>
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <label className="cursor-pointer rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5">
+          <label className="cursor-pointer rounded-lg border border-white/15 px-3 py-1 text-xs text-zinc-300 hover:bg-white/5">
             Ảnh đính kèm
             <input
               type="file"
@@ -141,7 +230,20 @@ export default function HomePage() {
               onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
             />
           </label>
-          {imageFile ? <span className="text-xs text-zinc-500">{imageFile.name}</span> : null}
+          {imagePreviewUrl ? (
+            <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-white/15 bg-[#18191a]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imagePreviewUrl} alt="preview" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setImageFile(null)}
+                className="absolute right-1 top-1 rounded-full bg-black/50 px-2 py-0.5 text-[10px] text-white hover:bg-black/70"
+                aria-label="Xóa ảnh"
+              >
+                ✕
+              </button>
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -158,12 +260,24 @@ export default function HomePage() {
             className="overflow-hidden rounded-xl border border-white/10 bg-[#242526] shadow-lg"
           >
             <div className="flex items-start gap-3 p-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3a3b3c] text-xs font-medium text-zinc-300">
-                U
-              </div>
+              <Link
+                href={`/profile/${encodeURIComponent(post.user.id)}`}
+                className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#3a3b3c]"
+              >
+                {post.user.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={post.user.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="text-xs font-bold text-zinc-300">U</div>
+                )}
+              </Link>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-zinc-200">Người học English</p>
-                <p className="text-xs text-zinc-500">Bài viết · News English</p>
+                <Link href={`/profile/${encodeURIComponent(post.user.id)}`} className="block">
+                  <p className="font-semibold text-zinc-200 truncate">{post.user.displayName}</p>
+                </Link>
+                <p className="text-xs text-zinc-500">
+                  {timeAgo(post.createdAt)} · Bài viết · News English
+                </p>
               </div>
             </div>
             <p className="px-4 pb-3 text-[15px] leading-relaxed text-zinc-100">{post.content}</p>
@@ -175,7 +289,7 @@ export default function HomePage() {
             <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-sm text-zinc-400">
               <span>{post.likes} lượt thích</span>
             </div>
-            <div className="flex gap-1 border-t border-white/10 px-2 py-1">
+            <div className="flex items-center gap-1 border-t border-white/10 px-2 py-1">
               <button
                 type="button"
                 className="flex-1 rounded-lg py-2 text-sm font-medium text-zinc-300 hover:bg-white/5"
@@ -186,14 +300,20 @@ export default function HomePage() {
                   })()
                 }
               >
-                👍 Thích
+                <span className="inline-flex items-center gap-2">
+                  <FaThumbsUp className="text-zinc-300" />
+                  Thích
+                </span>
               </button>
               <button
                 type="button"
                 className="flex-1 rounded-lg py-2 text-sm font-medium text-zinc-300 hover:bg-white/5"
                 onClick={() => void loadComments(post.id)}
               >
-                💬 Bình luận
+                <span className="inline-flex items-center gap-2">
+                  <FaCommentDots className="text-zinc-300" />
+                  Bình luận
+                </span>
               </button>
               <button
                 type="button"
@@ -209,8 +329,21 @@ export default function HomePage() {
                   })()
                 }
               >
-                📌 Lưu từ
+                <span className="inline-flex items-center gap-2">
+                  <FaBookmark className="text-emerald-400" />
+                  Lưu từ
+                </span>
               </button>
+              {meUserId && post.user.id === meUserId ? (
+                <button
+                  type="button"
+                  className="w-10 rounded-lg py-2 text-sm font-medium text-zinc-300 hover:bg-white/5"
+                  onClick={() => void deletePost(post.id)}
+                  aria-label="Xóa bài viết"
+                >
+                  <FaTrash />
+                </button>
+              ) : null}
             </div>
             <div className="border-t border-white/10 bg-[#18191a] p-3">
               <div className="flex gap-2">
@@ -240,8 +373,33 @@ export default function HomePage() {
               </div>
               <div className="mt-3 space-y-2">
                 {(postComments[post.id] ?? []).map((comment) => (
-                  <div key={comment.id} className="rounded-lg bg-[#3a3b3c]/50 px-3 py-2 text-sm text-zinc-200">
-                    {comment.content}
+                  <div
+                    key={comment.id}
+                    className="rounded-lg bg-[#3a3b3c]/50 px-3 py-2 text-sm text-zinc-200"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Link href={`/profile/${encodeURIComponent(comment.user.id)}`} className="mt-0.5 shrink-0">
+                        {comment.user.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={comment.user.avatarUrl}
+                            alt="avatar"
+                            className="h-7 w-7 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2f2f2f] text-[11px] font-bold text-zinc-300">
+                            {comment.user.displayName?.slice(0, 1).toUpperCase() ?? "U"}
+                          </div>
+                        )}
+                      </Link>
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/profile/${encodeURIComponent(comment.user.id)}`} className="block">
+                          <p className="text-xs text-zinc-300 truncate">{comment.user.displayName}</p>
+                        </Link>
+                        <p className="text-sm text-zinc-200 break-words">{comment.content}</p>
+                        <p className="mt-1 text-[11px] text-zinc-500">{timeAgo(comment.createdAt)}</p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
