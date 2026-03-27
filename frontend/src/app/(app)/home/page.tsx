@@ -13,6 +13,98 @@ type UserMini = {
   avatarUrl?: string;
 };
 
+const fishPretty = (t: string) => t;
+
+// Copied from Fish Collection so Home can render fish cards.
+const rarityStyle = (t: string) => {
+  switch (t) {
+    // 🟤 Tier thấp (D → A+)
+    case "D":
+      return "from-zinc-700 via-zinc-700 to-zinc-800 text-white border-zinc-500/60 shadow-[0_0_10px_rgba(39,39,42,0.25)]";
+    case "C":
+      return "from-zinc-500 via-zinc-500 to-slate-500 text-white border-zinc-200/50 shadow-[0_0_12px_rgba(148,163,184,0.18)]";
+    case "B":
+      return "from-sky-400 via-blue-300 to-cyan-300 text-black border-cyan-100 shadow-[0_0_14px_rgba(56,189,248,0.22)]";
+    case "A":
+      return "from-blue-600 via-sky-600 to-indigo-700 text-white border-blue-200/70 shadow-[0_0_16px_rgba(59,130,246,0.28)]";
+    case "A+":
+      return "from-blue-800 via-indigo-800 to-slate-900 text-white border-blue-200/70 shadow-[0_0_18px_rgba(59,130,246,0.35)]";
+
+    // 🔵 Tier khá (S → S+)
+    case "S":
+      return "from-emerald-500 via-green-500 to-lime-500 text-black border-lime-100 shadow-[0_0_18px_rgba(34,197,94,0.28)]";
+    case "S+":
+      return "from-emerald-600 via-green-600 to-lime-600 text-black border-lime-100 shadow-[0_0_22px_rgba(34,197,94,0.45)]";
+
+    // 🟣 Tier cao (SS → SSS+)
+    case "SS":
+      return "from-purple-600 via-violet-600 to-fuchsia-600 text-white border-purple-200/70 shadow-[0_0_22px_rgba(168,85,247,0.42)]";
+    case "SS+":
+      return "from-purple-800 via-violet-800 to-fuchsia-700 text-white border-fuchsia-200/80 shadow-[0_0_26px_rgba(217,70,239,0.55)]";
+    case "SSS":
+      return "from-fuchsia-500 via-pink-500 to-purple-500 text-white border-pink-200/70 shadow-[0_0_28px_rgba(236,72,153,0.55)]";
+    case "SSS+":
+      return "from-purple-600 via-fuchsia-500 to-pink-500 text-white border-fuchsia-200/80 shadow-[0_0_32px_rgba(236,72,153,0.62)]";
+
+    // 🟡 Tier hiếm (SSR → UR)
+    case "SSR":
+      return "from-amber-500 via-yellow-500 to-amber-600 text-black border-yellow-200 shadow-[0_0_34px_rgba(245,158,11,0.62)]";
+    case "UR":
+      return "from-yellow-300 via-amber-400 to-amber-600 text-black border-amber-100 shadow-[0_0_40px_rgba(245,158,11,0.72)]";
+
+    // 🔴 Tier đặc biệt (EX → Mythic)
+    case "EX":
+      return "from-red-500 via-orange-500 to-amber-500 text-black border-amber-100 shadow-[0_0_42px_rgba(239,68,68,0.55)]";
+    case "Mythic":
+      return "from-violet-600 via-rose-500 to-amber-500 text-white border-amber-100/70 shadow-[0_0_46px_rgba(244,63,94,0.55)]";
+
+    // ⚪ Tier tối thượng (Divine)
+    case "Divine":
+      return "from-white via-sky-100 to-purple-300 text-black border-white/80 shadow-[0_0_54px_rgba(255,255,255,0.8)]";
+    default:
+      return "from-zinc-500 via-zinc-400 to-slate-400 text-white border-zinc-200";
+  }
+};
+
+const rarityTextStyle = (t: string) => {
+  switch (t) {
+    case "D":
+      return "text-zinc-100 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]";
+    case "C":
+      return "text-zinc-50 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]";
+    case "B":
+      return "text-sky-950 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]";
+    case "A":
+      return "text-sky-50 drop-shadow-[0_0_12px_rgba(59,130,246,0.55)]";
+    case "A+":
+      return "text-sky-50 drop-shadow-[0_0_14px_rgba(59,130,246,0.75)]";
+    case "S":
+      return "text-emerald-950 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]";
+    case "S+":
+      return "text-emerald-950 drop-shadow-[0_0_14px_rgba(34,197,94,0.6)]";
+    case "SS":
+      return "text-purple-50 drop-shadow-[0_0_14px_rgba(168,85,247,0.7)]";
+    case "SS+":
+      return "text-fuchsia-50 drop-shadow-[0_0_16px_rgba(217,70,239,0.85)]";
+    case "SSS":
+      return "text-pink-50 drop-shadow-[0_0_18px_rgba(236,72,153,0.9)]";
+    case "SSS+":
+      return "text-pink-50 drop-shadow-[0_0_20px_rgba(236,72,153,0.95)]";
+    case "SSR":
+      return "text-yellow-50 drop-shadow-[0_0_20px_rgba(245,158,11,0.95)]";
+    case "UR":
+      return "text-yellow-50 drop-shadow-[0_0_24px_rgba(245,158,11,1)]";
+    case "EX":
+      return "text-amber-50 drop-shadow-[0_0_22px_rgba(239,68,68,0.85)]";
+    case "Mythic":
+      return "text-amber-50 drop-shadow-[0_0_24px_rgba(124,58,237,0.75)]";
+    case "Divine":
+      return "text-white drop-shadow-[0_0_26px_rgba(255,255,255,1)]";
+    default:
+      return "text-zinc-50 drop-shadow-[0_0_10px_rgba(255,255,255,0.45)]";
+  }
+};
+
 interface NewsItem {
   id: string;
   content: string;
@@ -21,6 +113,13 @@ interface NewsItem {
   userId: string;
   createdAt?: string;
   user: UserMini;
+  fishShare?: {
+    fishType: string;
+    vocabularyId: string;
+    vocabularyValue: string;
+    vocabularyMeaning: string;
+    topic: string;
+  } | null;
 }
 
 type CommentItem = {
@@ -284,6 +383,37 @@ export default function HomePage() {
             {post.imageUrl ? (
               <div className="px-4 pb-3">
                 <img src={post.imageUrl} alt="post" className="max-h-96 w-full rounded-lg object-cover" />
+              </div>
+            ) : null}
+            {post.fishShare ? (
+              <div className="px-4 pb-3">
+                <div
+                  className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-4 ${rarityStyle(
+                    post.fishShare.fishType,
+                  )}`}
+                >
+                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 select-none text-5xl font-black opacity-20">
+                    {fishPretty(post.fishShare.fishType)}
+                  </div>
+                  <div className="relative min-w-[220px] flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="rounded bg-black/25 px-2 py-0.5 text-xs text-white/95">
+                        {post.fishShare.topic}
+                      </span>
+                      <span
+                        className={`rounded-full border border-white/40 bg-black/25 px-2 py-0.5 text-xs font-semibold ${rarityTextStyle(
+                          post.fishShare.fishType,
+                        )}`}
+                      >
+                        Rank {fishPretty(post.fishShare.fishType)}
+                      </span>
+                    </div>
+                    <div className="mt-3 text-xl font-bold tracking-tight">
+                      {post.fishShare.vocabularyValue}
+                    </div>
+                    <div className="text-sm opacity-95">{post.fishShare.vocabularyMeaning}</div>
+                  </div>
+                </div>
               </div>
             ) : null}
             <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-sm text-zinc-400">

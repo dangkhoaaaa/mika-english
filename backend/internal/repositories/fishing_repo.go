@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type FishingRepository struct {
@@ -70,6 +71,21 @@ func (r *FishingRepository) CreateCatch(ctx context.Context, item *models.FishCa
 	}
 	_, err := r.catchCol.InsertOne(ctx, item)
 	return err
+}
+
+// SellOneCatch deletes ONE catch of a vocabulary (optionally specific fishType) and returns deleted doc.
+func (r *FishingRepository) SellOneCatch(ctx context.Context, userID, vocabularyID, fishType string) (*models.FishCatch, error) {
+	filter := bson.M{"userId": userID, "vocabularyId": vocabularyID}
+	if fishType != "" {
+		filter["fishType"] = fishType
+	}
+	opts := options.FindOneAndDelete().SetSort(bson.M{"caughtAt": -1})
+	var out models.FishCatch
+	err := r.catchCol.FindOneAndDelete(ctx, filter, opts).Decode(&out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 type FishingAchievements struct {
@@ -201,13 +217,22 @@ func (r *FishingRepository) GetCollection(ctx context.Context, userID string) (f
 
 func fishOrderMap() map[string]int {
 	return map[string]int{
-		"D":  0,
-		"C":  1,
-		"B":  2,
-		"A":  3,
-		"S":  4,
-		"SS": 5,
-		"SSS": 6,
+		"D":      0,
+		"C":      1,
+		"B":      2,
+		"A":      3,
+		"A+":     4,
+		"S":      5,
+		"S+":     6,
+		"SS":     7,
+		"SS+":    8,
+		"SSS":    9,
+		"SSS+":   10,
+		"SSR":    11,
+		"UR":     12,
+		"EX":     13,
+		"Mythic": 14,
+		"Divine": 15,
 	}
 }
 

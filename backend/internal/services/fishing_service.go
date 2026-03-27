@@ -17,47 +17,90 @@ import (
 type FishRarity = string
 
 const (
-	FishD   FishRarity = "D"
-	FishC   FishRarity = "C"
-	FishB   FishRarity = "B"
-	FishA   FishRarity = "A"
-	FishS   FishRarity = "S"
-	FishSS  FishRarity = "SS"
-	FishSSS FishRarity = "SSS"
+	FishD      FishRarity = "D"
+	FishC      FishRarity = "C"
+	FishB      FishRarity = "B"
+	FishA      FishRarity = "A"
+	FishAPlus  FishRarity = "A+"
+	FishS      FishRarity = "S"
+	FishSPlus  FishRarity = "S+"
+	FishSS     FishRarity = "SS"
+	FishSSPlus FishRarity = "SS+"
+	FishSSS    FishRarity = "SSS"
+	FishSSSPlus FishRarity = "SSS+"
+	FishSSR    FishRarity = "SSR"
+	FishUR     FishRarity = "UR"
+	FishEX     FishRarity = "EX"
+	FishMythic FishRarity = "Mythic"
+	FishDivine FishRarity = "Divine"
 )
 
-var fishTypes = []FishRarity{FishD, FishC, FishB, FishA, FishS, FishSS, FishSSS}
+var fishTypes = []FishRarity{
+	FishD, FishC, FishB, FishA, FishAPlus,
+	FishS, FishSPlus,
+	FishSS, FishSSPlus,
+	FishSSS, FishSSSPlus,
+	FishSSR, FishUR,
+	FishEX, FishMythic, FishDivine,
+}
 
 // Weighted by rarity (hiếm hơn => % nhỏ hơn).
 var fishWeights = map[FishRarity]int{
-	FishD:   450,
-	FishC:   300,
-	FishB:   150,
-	FishA:   70,
-	FishS:   25,
-	FishSS:  8,
-	FishSSS: 2,
+	FishD:      560,
+	FishC:      380,
+	FishB:      220,
+	FishA:      120,
+	FishAPlus:   70,
+	FishS:       40,
+	FishSPlus:   22,
+	FishSS:      12,
+	FishSSPlus:   6,
+	FishSSS:      3,
+	FishSSSPlus:  2,
+	FishSSR:      1,
+	FishUR:       1,
+	FishEX:       1,
+	FishMythic:   1,
+	FishDivine:   1,
 }
 
 var fishPoint = map[FishRarity]int{
-	FishD:   2,
-	FishC:   4,
-	FishB:   8,
-	FishA:   12,
-	FishS:   20,
-	FishSS:  30,
-	FishSSS: 45,
+	FishD:      2,
+	FishC:      4,
+	FishB:      8,
+	FishA:      12,
+	FishAPlus:  16,
+	FishS:      22,
+	FishSPlus:  28,
+	FishSS:     36,
+	FishSSPlus: 45,
+	FishSSS:    58,
+	FishSSSPlus: 72,
+	FishSSR:    90,
+	FishUR:     115,
+	FishEX:     145,
+	FishMythic: 190,
+	FishDivine: 260,
 }
 
 // Timing window width (ms) càng hiếm càng nhỏ.
 var fishWindow = map[FishRarity]int{
-	FishD:   600,
-	FishC:   450,
-	FishB:   320,
-	FishA:   220,
-	FishS:   140,
-	FishSS:  90,
-	FishSSS: 60,
+	FishD:      620,
+	FishC:      480,
+	FishB:      360,
+	FishA:      260,
+	FishAPlus:  220,
+	FishS:      170,
+	FishSPlus:  140,
+	FishSS:     115,
+	FishSSPlus: 95,
+	FishSSS:    75,
+	FishSSSPlus: 62,
+	FishSSR:    52,
+	FishUR:     44,
+	FishEX:     38,
+	FishMythic: 34,
+	FishDivine: 30,
 }
 
 var mechanicDurationMs = 3000
@@ -114,6 +157,38 @@ func NewFishingService(vocabRepo *repositories.VocabularyRepository, repo *repos
 	return &FishingService{vocabRepo: vocabRepo, repo: repo, stats: stats}
 }
 
+type RodInfo struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Price       int     `json:"price"`
+	BiteFactor  float64 `json:"biteFactor"`  // <1 giảm thời gian chờ cá cắn
+	WindowBonus float64 `json:"windowBonus"` // +0.1 = nới timing window 10%
+}
+
+func shopRods() []RodInfo {
+	return []RodInfo{
+		{ID: "basic", Name: "Cần tre (Basic)", Price: 0, BiteFactor: 1.0, WindowBonus: 0.0},
+		{ID: "bronze", Name: "Cần đồng", Price: 120, BiteFactor: 0.92, WindowBonus: 0.10},
+		{ID: "silver", Name: "Cần bạc", Price: 320, BiteFactor: 0.86, WindowBonus: 0.10},
+		{ID: "gold", Name: "Cần vàng", Price: 650, BiteFactor: 0.80, WindowBonus: 0.10},
+		{ID: "mythic-rod", Name: "Cần Mythic", Price: 1500, BiteFactor: 0.72, WindowBonus: 0.10},
+	}
+}
+
+// ShopRodsPublic exposes shop rods for handlers.
+func ShopRodsPublic() []RodInfo {
+	return shopRods()
+}
+
+func rodByID(id string) (RodInfo, bool) {
+	for _, r := range shopRods() {
+		if r.ID == id {
+			return r, true
+		}
+	}
+	return RodInfo{}, false
+}
+
 func fishSizeIndexOf(t string) int {
 	switch t {
 	case "D":
@@ -124,12 +199,30 @@ func fishSizeIndexOf(t string) int {
 		return 2
 	case "A":
 		return 3
-	case "S":
+	case "A+":
 		return 4
-	case "SS":
+	case "S":
 		return 5
-	case "SSS":
+	case "S+":
 		return 6
+	case "SS":
+		return 7
+	case "SS+":
+		return 8
+	case "SSS":
+		return 9
+	case "SSS+":
+		return 10
+	case "SSR":
+		return 11
+	case "UR":
+		return 12
+	case "EX":
+		return 13
+	case "Mythic":
+		return 14
+	case "Divine":
+		return 15
 	default:
 		return 0
 	}
@@ -151,10 +244,13 @@ func pickFishType(rng *rand.Rand) FishRarity {
 	return FishD
 }
 
-func targetWindow(rng *rand.Rand, t FishRarity) (startMs, endMs int) {
+func targetWindow(rng *rand.Rand, t FishRarity, windowBonus float64) (startMs, endMs int) {
 	w := fishWindow[t]
 	if w <= 0 {
 		w = 200
+	}
+	if windowBonus > 0 {
+		w = int(float64(w) * (1.0 + windowBonus))
 	}
 	if w > mechanicDurationMs {
 		w = mechanicDurationMs
@@ -210,8 +306,27 @@ func (s *FishingService) Start(ctx context.Context, userID string, req FishingSt
 
 	// random bite delay 5-30s
 	biteDelayMs := (5 + rng.Intn(26)) * 1000 // [5..30] => 5..30 inclusive
+	// Apply rod effects (giảm chờ + nới timing window)
+	windowBonus := 0.0
+	if st, _ := s.stats.GetMe(ctx, userID); st != nil {
+		rodID := strings.TrimSpace(st.Rod)
+		if rodID == "" {
+			rodID = "basic"
+		}
+		if rod, ok := rodByID(rodID); ok {
+			if rod.BiteFactor > 0 && rod.BiteFactor < 1.0 {
+				biteDelayMs = int(float64(biteDelayMs) * rod.BiteFactor)
+				if biteDelayMs < 2500 {
+					biteDelayMs = 2500
+				}
+			}
+			if rod.WindowBonus > 0 {
+				windowBonus = rod.WindowBonus
+			}
+		}
+	}
 
-	ts, te := targetWindow(rng, fish)
+	ts, te := targetWindow(rng, fish, windowBonus)
 
 	attempt := &models.FishingAttempt{
 		UserID: userID,
@@ -249,6 +364,112 @@ func (s *FishingService) Start(ctx context.Context, userID string, req FishingSt
 			TargetEndMs:        te,
 		},
 	}, nil
+}
+
+var fishSellPrice = map[FishRarity]int{
+	FishD:      1,
+	FishC:      2,
+	FishB:      4,
+	FishA:      7,
+	FishAPlus:  10,
+	FishS:      14,
+	FishSPlus:  18,
+	FishSS:     24,
+	FishSSPlus: 30,
+	FishSSS:    38,
+	FishSSSPlus: 48,
+	FishSSR:    60,
+	FishUR:     80,
+	FishEX:     110,
+	FishMythic: 150,
+	FishDivine: 220,
+}
+
+type FishingSellRequest struct {
+	VocabularyID string `json:"vocabularyId"`
+	FishType     string `json:"fishType,omitempty"`
+}
+
+type FishingSellResponse struct {
+	CoinsGained int             `json:"coinsGained"`
+	Sold        *models.FishCatch `json:"sold"`
+	Stats       *models.UserStats `json:"stats"`
+}
+
+func (s *FishingService) Sell(ctx context.Context, userID string, req FishingSellRequest) (*FishingSellResponse, error) {
+	vocabID := strings.TrimSpace(req.VocabularyID)
+	if vocabID == "" {
+		return nil, fmt.Errorf("missing vocabularyId")
+	}
+	fishType := strings.TrimSpace(req.FishType)
+	catch, err := s.repo.SellOneCatch(ctx, userID, vocabID, fishType)
+	if err != nil {
+		return nil, err
+	}
+	price := fishSellPrice[FishRarity(catch.FishType)]
+	if price <= 0 {
+		price = 1
+	}
+	st, err := s.stats.AddCoins(ctx, userID, price)
+	if err != nil {
+		return nil, err
+	}
+	return &FishingSellResponse{CoinsGained: price, Sold: catch, Stats: st}, nil
+}
+
+type FishingBuyRodRequest struct {
+	RodID string `json:"rodId"`
+}
+
+type FishingBuyRodResponse struct {
+	Ok    bool            `json:"ok"`
+	Stats *models.UserStats `json:"stats,omitempty"`
+	Error string          `json:"error,omitempty"`
+}
+
+func (s *FishingService) BuyRod(ctx context.Context, userID string, rodID string) (*FishingBuyRodResponse, error) {
+	rodID = strings.TrimSpace(rodID)
+	if rodID == "" {
+		return &FishingBuyRodResponse{Ok: false, Error: "missing rodId"}, nil
+	}
+	rod, ok := rodByID(rodID)
+	if !ok {
+		return &FishingBuyRodResponse{Ok: false, Error: "rod not found"}, nil
+	}
+	if err := s.stats.EnsureBase(ctx, userID); err != nil {
+		return nil, err
+	}
+	now := time.Now().UTC()
+	ok2, st, err := s.stats.repo.BuyRod(ctx, userID, rod.ID, rod.Price, now)
+	if err != nil {
+		return nil, err
+	}
+	if !ok2 {
+		return &FishingBuyRodResponse{Ok: false, Error: "không đủ tiền"}, nil
+	}
+	return &FishingBuyRodResponse{Ok: true, Stats: st}, nil
+}
+
+func (s *FishingService) EquipRod(ctx context.Context, userID string, rodID string) (*FishingBuyRodResponse, error) {
+	rodID = strings.TrimSpace(rodID)
+	if rodID == "" {
+		return &FishingBuyRodResponse{Ok: false, Error: "missing rodId"}, nil
+	}
+	if _, ok := rodByID(rodID); !ok {
+		return &FishingBuyRodResponse{Ok: false, Error: "rod not found"}, nil
+	}
+	if err := s.stats.EnsureBase(ctx, userID); err != nil {
+		return nil, err
+	}
+	now := time.Now().UTC()
+	ok2, st, err := s.stats.repo.EquipRod(ctx, userID, rodID, now)
+	if err != nil {
+		return nil, err
+	}
+	if !ok2 {
+		return &FishingBuyRodResponse{Ok: false, Error: "chưa sở hữu cần câu này"}, nil
+	}
+	return &FishingBuyRodResponse{Ok: true, Stats: st}, nil
 }
 
 func (s *FishingService) Submit(ctx context.Context, userID string, req FishingSubmitRequest) (*FishingSubmitResponse, error) {

@@ -102,6 +102,9 @@ func (r *StatsRepository) EnsureBase(ctx context.Context, userID string, now tim
 			"userId":         userID,
 			"points":         0,
 			"rank":           "Đồng",
+			"coins":          0,
+			"rod":            "basic",
+			"ownedRods":      []string{"basic"},
 			"streakDays":     0,
 			"lastCheckInDate": "",
 			"lastActiveAt":   now,
@@ -110,6 +113,52 @@ func (r *StatsRepository) EnsureBase(ctx context.Context, userID string, now tim
 		},
 	}, options.Update().SetUpsert(true))
 	return err
+}
+
+func (r *StatsRepository) AddCoins(ctx context.Context, userID string, delta int, now time.Time) (*models.UserStats, error) {
+	_, err := r.col.UpdateOne(ctx, bson.M{"userId": userID}, bson.M{
+		"$inc": bson.M{"coins": delta},
+		"$set": bson.M{"updatedAt": now},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return r.GetByUser(ctx, userID)
+}
+
+// BuyRod sẽ trừ coins nếu đủ và set rod (atomic by filter coins >= price).
+func (r *StatsRepository) BuyRod(ctx context.Context, userID, rodID string, price int, now time.Time) (bool, *models.UserStats, error) {
+	filter := bson.M{"userId": userID, "coins": bson.M{"$gte": price}}
+	update := bson.M{
+		"$inc": bson.M{"coins": -price},
+		"$set": bson.M{"rod": rodID, "updatedAt": now},
+		"$addToSet": bson.M{"ownedRods": rodID},
+	}
+	res, err := r.col.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return false, nil, err
+	}
+	if res.ModifiedCount == 0 {
+		// không đủ tiền hoặc user chưa có stats
+		return false, nil, nil
+	}
+	s, err := r.GetByUser(ctx, userID)
+	return true, s, err
+}
+
+// EquipRod sets active rod if already owned.
+func (r *StatsRepository) EquipRod(ctx context.Context, userID, rodID string, now time.Time) (bool, *models.UserStats, error) {
+	filter := bson.M{"userId": userID, "ownedRods": rodID}
+	update := bson.M{"$set": bson.M{"rod": rodID, "updatedAt": now}}
+	res, err := r.col.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return false, nil, err
+	}
+	if res.ModifiedCount == 0 {
+		return false, nil, nil
+	}
+	s, err := r.GetByUser(ctx, userID)
+	return true, s, err
 }
 
 // Use this helper for any place where we need created object id.
@@ -121,6 +170,29 @@ func (r *StatsRepository) TopByPoints(ctx context.Context, limit int64) ([]model
 	}
 	cursor, err := r.col.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{
 		{Key: "points", Value: -1},
+		{Key: "updatedAt", Value: 1},
+	}).SetLimit(limit))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	out := make([]models.UserStats, 0)
+	for cursor.Next(ctx) {
+		var s models.UserStats
+		if err := cursor.Decode(&s); err != nil {
+			return nil, err
+		}
+		out = append(out, s)
+	}
+	return out, cursor.Err()
+}
+
+func (r *StatsRepository) TopByCoins(ctx context.Context, limit int64) ([]models.UserStats, error) {
+	if limit <= 0 {
+		limit = 50
+	}
+	cursor, err := r.col.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{
+		{Key: "coins", Value: -1},
 		{Key: "updatedAt", Value: 1},
 	}).SetLimit(limit))
 	if err != nil {

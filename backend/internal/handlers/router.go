@@ -595,6 +595,85 @@ func NewRouter() http.Handler {
 		writeJSON(w, http.StatusOK, resp)
 	}))
 
+	// Shop cần câu
+	mux.HandleFunc("/api/v1/fishing/shop", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		writeJSON(w, http.StatusOK, services.ShopRodsPublic())
+	}))
+
+	mux.HandleFunc("/api/v1/fishing/shop/buy", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		var req struct {
+			RodID string `json:"rodId"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid payload"})
+			return
+		}
+		uid := getUserID(r.Context())
+		resp, err := fishingService.BuyRod(r.Context(), uid, req.RodID)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		if !resp.Ok {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": resp.Error})
+			return
+		}
+		writeJSON(w, http.StatusOK, resp)
+	}))
+
+	mux.HandleFunc("/api/v1/fishing/shop/equip", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		var req struct {
+			RodID string `json:"rodId"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid payload"})
+			return
+		}
+		uid := getUserID(r.Context())
+		resp, err := fishingService.EquipRod(r.Context(), uid, req.RodID)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		if !resp.Ok {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": resp.Error})
+			return
+		}
+		writeJSON(w, http.StatusOK, resp)
+	}))
+
+	// Bán cá (nhận coins)
+	mux.HandleFunc("/api/v1/fishing/sell", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		var req services.FishingSellRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid payload"})
+			return
+		}
+		uid := getUserID(r.Context())
+		resp, err := fishingService.Sell(r.Context(), uid, req)
+		if err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			return
+		}
+		writeJSON(w, http.StatusOK, resp)
+	}))
+
 	mux.HandleFunc("/api/v1/leaderboard", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
@@ -610,9 +689,15 @@ func NewRouter() http.Handler {
 			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 			return
 		}
+		topCoins, err := leaderboardService.TopCoins(r.Context(), 50)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
 		writeJSON(w, http.StatusOK, map[string]any{
 			"topPoints": topPoints,
 			"topFish":   topFish,
+			"topCoins":  topCoins,
 		})
 	}))
 
@@ -717,6 +802,7 @@ func NewRouter() http.Handler {
 				Likes     int64     `json:"likes"`
 				CreatedAt time.Time `json:"createdAt"`
 				ImageURL  string   `json:"imageUrl,omitempty"`
+				FishShare *models.FishSharePayload `json:"fishShare,omitempty"`
 				User      userMini  `json:"user"`
 			}
 
@@ -746,6 +832,7 @@ func NewRouter() http.Handler {
 					Likes:      p.Likes,
 					CreatedAt:  p.CreatedAt,
 					ImageURL:   p.ImageURL,
+					FishShare:  p.FishShare,
 					User: userMini{
 						ID:           u.ID.Hex(),
 						DisplayName: u.DisplayName,

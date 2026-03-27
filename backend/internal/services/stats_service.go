@@ -109,3 +109,11 @@ func (s *StatsService) DebugRank(points int) string {
 	return fmt.Sprintf("%s", RankFromPoints(points))
 }
 
+func (s *StatsService) AddCoins(ctx context.Context, userID string, delta int) (*models.UserStats, error) {
+	if err := s.EnsureBase(ctx, userID); err != nil {
+		return nil, err
+	}
+	now := time.Now().UTC()
+	return s.repo.AddCoins(ctx, userID, delta, now)
+}
+

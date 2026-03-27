@@ -11,6 +11,7 @@ type Row = {
   avatarUrl?: string;
   rank?: string;
   points?: number;
+  coins?: number;
   totalCatches?: number;
   totalUnique?: number;
 };
@@ -45,9 +46,10 @@ const rankFromPoints = (points?: number) => {
 export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"points" | "fish">("points");
+  const [tab, setTab] = useState<"points" | "fish" | "coins">("points");
   const [topPoints, setTopPoints] = useState<Row[]>([]);
   const [topFish, setTopFish] = useState<Row[]>([]);
+  const [topCoins, setTopCoins] = useState<Row[]>([]);
   const [sortBy, setSortBy] = useState<"score" | "name">("score");
   const [filterText, setFilterText] = useState("");
 
@@ -62,6 +64,7 @@ export default function LeaderboardPage() {
         const res = await api.get("/api/v1/leaderboard");
         setTopPoints(Array.isArray(res.data?.topPoints) ? res.data.topPoints : []);
         setTopFish(Array.isArray(res.data?.topFish) ? res.data.topFish : []);
+        setTopCoins(Array.isArray(res.data?.topCoins) ? res.data.topCoins : []);
       } catch (e: any) {
         setError(e?.response?.data?.error ?? "Tải bảng xếp hạng thất bại.");
       } finally {
@@ -71,7 +74,7 @@ export default function LeaderboardPage() {
     void load();
   }, []);
 
-  let rows = tab === "points" ? [...topPoints] : [...topFish];
+  let rows = tab === "points" ? [...topPoints] : tab === "fish" ? [...topFish] : [...topCoins];
   if (filterText.trim()) {
     const q = filterText.trim().toLowerCase();
     rows = rows.filter((r) => (r.displayName ?? "").toLowerCase().includes(q));
@@ -82,6 +85,9 @@ export default function LeaderboardPage() {
     }
     if (tab === "points") {
       return (b.points ?? 0) - (a.points ?? 0);
+    }
+    if (tab === "coins") {
+      return (b.coins ?? 0) - (a.coins ?? 0);
     }
     return (b.totalCatches ?? 0) - (a.totalCatches ?? 0);
   });
@@ -107,6 +113,13 @@ export default function LeaderboardPage() {
           className={`rounded-lg px-4 py-2 text-sm ${tab === "fish" ? "bg-[#E50914] text-white" : "bg-[#2b2b2b] text-zinc-300"}`}
         >
           🎣 Top cá
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("coins")}
+          className={`rounded-lg px-4 py-2 text-sm ${tab === "coins" ? "bg-[#E50914] text-white" : "bg-[#2b2b2b] text-zinc-300"}`}
+        >
+          💰 Top vàng
         </button>
       </div>
       <div className="mb-4 flex flex-wrap gap-2">
@@ -162,6 +175,8 @@ export default function LeaderboardPage() {
                           Rank:{" "}
                           <span className={rankFromPoints(r.points).color}>{rankFromPoints(r.points).name}</span>
                         </p>
+                      ) : tab === "coins" ? (
+                        <p className="text-xs text-zinc-500">Tích luỹ coins</p>
                       ) : (
                         <p className="text-xs text-zinc-500">Cá unique: {r.totalUnique ?? 0}</p>
                       )}
@@ -171,6 +186,8 @@ export default function LeaderboardPage() {
                 <div className="text-right">
                   {tab === "points" ? (
                     <p className="font-semibold text-[#E50914]">{r.points ?? 0} điểm</p>
+                  ) : tab === "coins" ? (
+                    <p className="font-semibold text-yellow-200">💰 {r.coins ?? 0}</p>
                   ) : (
                     <p className="font-semibold text-[#E50914]">{r.totalCatches ?? 0} cá</p>
                   )}

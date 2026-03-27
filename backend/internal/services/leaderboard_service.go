@@ -22,6 +22,7 @@ type LeaderboardUserRow struct {
 	AvatarURL   string `json:"avatarUrl,omitempty"`
 	Rank        string `json:"rank,omitempty"`
 	Points      int    `json:"points,omitempty"`
+	Coins       int    `json:"coins,omitempty"`
 	TotalCatches int   `json:"totalCatches,omitempty"`
 	TotalUnique int    `json:"totalUnique,omitempty"`
 }
@@ -87,6 +88,37 @@ func (s *LeaderboardService) TopFish(ctx context.Context, limit int) ([]Leaderbo
 			AvatarURL:   avatarMap[t.UserID],
 			TotalCatches: t.TotalCatches,
 			TotalUnique: t.TotalUnique,
+		})
+	}
+	return out, nil
+}
+
+func (s *LeaderboardService) TopCoins(ctx context.Context, limit int64) ([]LeaderboardUserRow, error) {
+	stats, err := s.statsRepo.TopByCoins(ctx, limit)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]string, 0, len(stats))
+	for _, st := range stats {
+		ids = append(ids, st.UserID)
+	}
+	users, err := s.userRepo.ListByIDs(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	userMap := map[string]string{}
+	avatarMap := map[string]string{}
+	for _, u := range users {
+		userMap[u.ID.Hex()] = u.DisplayName
+		avatarMap[u.ID.Hex()] = u.AvatarURL
+	}
+	out := make([]LeaderboardUserRow, 0, len(stats))
+	for _, st := range stats {
+		out = append(out, LeaderboardUserRow{
+			UserID:      st.UserID,
+			DisplayName: pickName(userMap[st.UserID], st.UserID),
+			AvatarURL:   avatarMap[st.UserID],
+			Coins:       st.Coins,
 		})
 	}
 	return out, nil

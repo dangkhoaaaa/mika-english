@@ -52,6 +52,16 @@ type NewsPost struct {
 	ImageURL  string    `bson:"imageUrl,omitempty" json:"imageUrl,omitempty"`
 	Likes     int64     `bson:"likes" json:"likes"`
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
+	FishShare *FishSharePayload `bson:"fishShare,omitempty" json:"fishShare,omitempty"`
+}
+
+// FishSharePayload — payload để share 1 con cá cụ thể lên Home (render như 1 card).
+type FishSharePayload struct {
+	FishType          string `bson:"fishType" json:"fishType"`
+	VocabularyID      string `bson:"vocabularyId" json:"vocabularyId"`
+	VocabularyValue   string `bson:"vocabularyValue" json:"vocabularyValue"`
+	VocabularyMeaning string `bson:"vocabularyMeaning" json:"vocabularyMeaning"`
+	Topic             string `bson:"topic" json:"topic"`
 }
 
 type Comment struct {
@@ -118,6 +128,9 @@ type UserStats struct {
 	UserID          string             `bson:"userId" json:"userId"`
 	Points          int                `bson:"points" json:"points"`
 	Rank            string             `bson:"rank" json:"rank"`
+	Coins           int                `bson:"coins" json:"coins"`
+	Rod             string             `bson:"rod,omitempty" json:"rod,omitempty"` // id của cần câu đang dùng
+	OwnedRods       []string           `bson:"ownedRods,omitempty" json:"ownedRods,omitempty"`
 	StreakDays      int                `bson:"streakDays" json:"streakDays"`
 	LastCheckInDate string            `bson:"lastCheckInDate" json:"lastCheckInDate"` // YYYY-MM-DD
 	LastActiveAt    time.Time        `bson:"lastActiveAt" json:"lastActiveAt"`
@@ -175,6 +188,7 @@ type FishingAttempt struct {
 	Topic    string `bson:"topic" json:"topic"`
 
 	FishType   string `bson:"fishType" json:"fishType"` // D/C/B/A/S/SS/SSS
+	// FishType: D < C < B < A < A+ < S < S+ < SS < SS+ < SSS < SSS+ < SSR < UR < EX < Mythic < Divine
 	VocabularyID string `bson:"vocabularyId" json:"vocabularyId"`
 	VocabularyValue string `bson:"vocabularyValue" json:"vocabularyValue"`
 	VocabularyMeaning string `bson:"vocabularyMeaning" json:"vocabularyMeaning"`

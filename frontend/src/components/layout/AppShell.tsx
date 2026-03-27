@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, setAuthToken } from "@/lib/api";
 import { clearSession, getAccessToken, getRefreshToken } from "@/lib/session";
 import { WakeupPing } from "@/components/infra/WakeupPing";
@@ -22,6 +22,7 @@ import {
   FaTrophy,
   FaUser,
   FaSearch,
+  FaShoppingCart,
 } from "react-icons/fa";
 
 type NavItem = {
@@ -42,6 +43,7 @@ const navItems: NavItem[] = [
   { href: "/motivation", label: "Động lực", icon: <FaBolt /> },
   { href: "/fishing", label: "Câu cá", icon: <FaFish /> },
   { href: "/fish-collection", label: "Sưu tập cá", icon: <FaStar /> },
+  { href: "/shop", label: "Shop dụng cụ", icon: <FaShoppingCart /> },
   { href: "/leaderboard", label: "BXH", icon: <FaTrophy /> },
   { href: "/profile", label: "Trang cá nhân", icon: <FaUser /> },
   { href: "/users", label: "Tìm user", icon: <FaSearch /> },
@@ -53,6 +55,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const [coins, setCoins] = useState<number>(0);
+
+  const refreshCoins = async () => {
+    const access = getAccessToken();
+    if (!access) return;
+    setAuthToken(access);
+    try {
+      const res = await api.get("/api/v1/stats/me");
+      const c = Number(res.data?.coins ?? 0);
+      setCoins(Number.isFinite(c) ? c : 0);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  useEffect(() => {
+    void refreshCoins();
+    const onUpdate = () => void refreshCoins();
+    window.addEventListener("coins:update", onUpdate);
+    return () => window.removeEventListener("coins:update", onUpdate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const logout = async () => {
     const refresh = getRefreshToken();
@@ -95,6 +119,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="mx-auto hidden max-w-md flex-1 sm:block">
             <div className="rounded-full bg-[#3a3a3a] px-4 py-2 text-sm text-zinc-400">
               Tìm kiếm trên Mika English…
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="rounded-full border border-yellow-400/30 bg-yellow-950/30 px-3 py-1 text-sm text-yellow-200">
+              💰 {coins}
             </div>
           </div>
 

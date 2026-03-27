@@ -49,12 +49,30 @@ const fishPretty = (t: string) => {
       return "B";
     case "A":
       return "A";
+    case "A+":
+      return "A+";
     case "S":
       return "S";
+    case "S+":
+      return "S+";
     case "SS":
       return "SS";
+    case "SS+":
+      return "SS+";
     case "SSS":
       return "SSS";
+    case "SSS+":
+      return "SSS+";
+    case "SSR":
+      return "SSR";
+    case "UR":
+      return "UR";
+    case "EX":
+      return "EX";
+    case "Mythic":
+      return "Mythic";
+    case "Divine":
+      return "Divine";
     default:
       return t;
   }
@@ -73,6 +91,7 @@ export default function FishingPage() {
   const [phase, setPhase] = useState<"idle" | "waiting" | "timing" | "answer" | "result">("idle");
 
   const [biteLeftMs, setBiteLeftMs] = useState(0);
+  const [preTimingMs, setPreTimingMs] = useState(0);
   const [mechanicStartTs, setMechanicStartTs] = useState<number | null>(null);
   const [clickOffsetMs, setClickOffsetMs] = useState<number | null>(null);
   const [timingOkLocal, setTimingOkLocal] = useState(false);
@@ -87,6 +106,38 @@ export default function FishingPage() {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const [biteFxTick, setBiteFxTick] = useState(0);
   const [resultFxTick, setResultFxTick] = useState(0);
+
+  const [rodInfo, setRodInfo] = useState<{ name: string; biteReducePct: number; windowBonusPct: number } | null>(null);
+
+  // Rank-up popup (dựa trên points)
+  const rankMilestones = [
+    { name: "Đồng III", min: 0, color: "text-zinc-300" },
+    { name: "Đồng II", min: 66, color: "text-zinc-300" },
+    { name: "Đồng I", min: 132, color: "text-zinc-300" },
+    { name: "Bạc III", min: 200, color: "text-slate-200" },
+    { name: "Bạc II", min: 300, color: "text-slate-200" },
+    { name: "Bạc I", min: 400, color: "text-slate-200" },
+    { name: "Vàng III", min: 500, color: "text-amber-300" },
+    { name: "Vàng II", min: 666, color: "text-amber-300" },
+    { name: "Vàng I", min: 832, color: "text-amber-300" },
+    { name: "Bạch kim III", min: 1000, color: "text-cyan-300" },
+    { name: "Bạch kim II", min: 1333, color: "text-cyan-300" },
+    { name: "Bạch kim I", min: 1666, color: "text-cyan-300" },
+    { name: "Kim cương III", min: 2000, color: "text-indigo-300" },
+    { name: "Kim cương II", min: 2666, color: "text-indigo-300" },
+    { name: "Kim cương I", min: 3332, color: "text-indigo-300" },
+    { name: "Cao thủ III", min: 4000, color: "text-fuchsia-300" },
+    { name: "Cao thủ II", min: 4333, color: "text-fuchsia-300" },
+    { name: "Cao thủ I", min: 4666, color: "text-fuchsia-300" },
+  ] as const;
+
+  const getRankStep = (points: number) => {
+    const sorted = [...rankMilestones].sort((a, b) => a.min - b.min);
+    return sorted.filter((r) => r.min <= points).slice(-1)[0] ?? sorted[0];
+  };
+
+  const [rankPopup, setRankPopup] = useState<{ from: string; to: string; color: string } | null>(null);
+  const [lastPoints, setLastPoints] = useState<number | null>(null);
 
   const topicOptions = useMemo(() => {
     const s = new Set<string>();
@@ -116,6 +167,33 @@ export default function FishingPage() {
   useEffect(() => {
     void loadVocab();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
+      const token = getAccessToken();
+      if (!token) return;
+      setAuthToken(token);
+      try {
+        const [statsRes, shopRes] = await Promise.all([api.get("/api/v1/stats/me"), api.get("/api/v1/fishing/shop")]);
+        const rodId = String(statsRes.data?.rod ?? "basic");
+        const rods = Array.isArray(shopRes.data) ? shopRes.data : [];
+        const rod = rods.find((r: any) => String(r?.id) === rodId);
+        if (!rod) {
+          setRodInfo({ name: rodId, biteReducePct: 0, windowBonusPct: 0 });
+          return;
+        }
+        const biteFactor = Number(rod.biteFactor ?? 1);
+        const windowBonus = Number(rod.windowBonus ?? 0);
+        setRodInfo({
+          name: String(rod.name ?? rodId),
+          biteReducePct: Math.max(0, Math.round((1 - biteFactor) * 100)),
+          windowBonusPct: Math.round(windowBonus * 100),
+        });
+      } catch {
+        /* ignore */
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -176,6 +254,7 @@ export default function FishingPage() {
   const startBiteCountdown = (ms: number) => {
     clearTimers();
     setBiteLeftMs(ms);
+    setPreTimingMs(0);
     const startedAt = Date.now();
     timersRef.current.bite = window.setInterval(() => {
       const elapsed = Date.now() - startedAt;
@@ -184,8 +263,23 @@ export default function FishingPage() {
       if (left <= 0) {
         if (timersRef.current.bite) window.clearInterval(timersRef.current.bite);
         timersRef.current.bite = undefined;
+
+        // Vào timing trước (render UI), rồi đợi 3s mới bắt đầu chạy pointer/click.
         setPhase("timing");
-        setMechanicStartTs(Date.now());
+        setMechanicStartTs(null);
+
+        // Đợi thêm 3s cho UI load ổn định (tránh lag)
+        const extra = 3000;
+        setPreTimingMs(extra);
+        const preStart = Date.now();
+        const id = window.setInterval(() => {
+          const l = Math.max(0, extra - (Date.now() - preStart));
+          setPreTimingMs(l);
+          if (l <= 0) {
+            window.clearInterval(id);
+            setMechanicStartTs(Date.now());
+          }
+        }, 100);
       }
     }, 100);
   };
@@ -265,6 +359,18 @@ export default function FishingPage() {
       setResult(res.data);
       setPhase("result");
       clearTimers();
+
+      // Rank-up popup
+      if (res.data?.stats) {
+        const newPoints = Number(res.data.stats.points ?? 0);
+        const prevPoints = lastPoints ?? Math.max(0, newPoints - Number(res.data.pointsGained ?? 0));
+        const prevStep = getRankStep(prevPoints);
+        const nextStep = getRankStep(newPoints);
+        setLastPoints(newPoints);
+        if (prevStep.name !== nextStep.name) {
+          setRankPopup({ from: prevStep.name, to: nextStep.name, color: nextStep.color });
+        }
+      }
     } catch (e: any) {
       setError(e?.response?.data?.error ?? (autoTimeout ? "Tự động nộp thất bại." : "Nộp thất bại."));
     } finally {
@@ -273,19 +379,32 @@ export default function FishingPage() {
   };
 
   const fishBubbleStyle = (sizeIndex: number) => {
-    // map 0..6 -> px
-    const base = 34;
-    const step = 10;
+    // map 0..15 -> px (rank càng cao bóng càng to)
+    const base = 30;
+    const step = 6;
     const px = base + sizeIndex * step;
+
+    const palette = (idx: number) => {
+      // theo rank: thấp -> ít hiệu ứng, cao -> gradient/glow mạnh
+      if (idx <= 1) return { bg: "rgba(148,163,184,0.12)", glow: "0 0 18px rgba(148,163,184,0.18)" }; // D/C
+      if (idx <= 4) return { bg: "rgba(59,130,246,0.14)", glow: "0 0 20px rgba(59,130,246,0.22)" }; // B/A/A+
+      if (idx <= 6) return { bg: "rgba(34,197,94,0.14)", glow: "0 0 22px rgba(34,197,94,0.28)" }; // S/S+
+      if (idx <= 10) return { bg: "rgba(168,85,247,0.16)", glow: "0 0 26px rgba(217,70,239,0.34)" }; // SS..SSS+
+      if (idx <= 12) return { bg: "rgba(245,158,11,0.18)", glow: "0 0 28px rgba(245,158,11,0.40)" }; // SSR/UR
+      if (idx <= 13) return { bg: "rgba(239,68,68,0.18)", glow: "0 0 30px rgba(245,158,11,0.35)" }; // EX
+      if (idx <= 14) return { bg: "rgba(124,58,237,0.18)", glow: "0 0 34px rgba(244,63,94,0.38)" }; // Mythic
+      return { bg: "rgba(255,255,255,0.16)", glow: "0 0 40px rgba(255,255,255,0.55)" }; // Divine
+    };
+    const p = palette(sizeIndex);
+
     return {
       width: `${px}px`,
       height: `${px}px`,
       borderRadius: "9999px",
       background:
-        sizeIndex >= 5
-          ? "radial-gradient(circle at 30% 30%, #ffffff 0%, rgba(255,255,255,0.35) 20%, rgba(255,255,255,0) 55%), radial-gradient(circle at 50% 60%, rgba(239,68,68,0.25) 0%, rgba(239,68,68,0.02) 60%), rgba(226,232,240,0.15)"
-          : "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.2) 30%, rgba(255,255,255,0) 55%), rgba(59,130,246,0.12)",
-      boxShadow: sizeIndex >= 5 ? "0 0 24px rgba(239,68,68,0.35)" : "0 0 20px rgba(59,130,246,0.25)",
+        "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.22) 30%, rgba(255,255,255,0) 55%), " +
+        p.bg,
+      boxShadow: p.glow,
       border: "1px solid rgba(255,255,255,0.10)",
     } as const;
   };
@@ -355,6 +474,15 @@ export default function FishingPage() {
           </div>
 
           <div className="flex items-end gap-2">
+            {rodInfo ? (
+              <div className="hidden md:block rounded-lg border border-white/10 bg-[#18191a] px-3 py-2 text-xs text-zinc-300">
+                Cần: <strong className="text-white">{rodInfo.name}</strong>
+                <div className="mt-0.5 text-[11px] text-zinc-500">
+                  Giảm chờ: <strong className="text-zinc-200">{rodInfo.biteReducePct}%</strong> · Bảo hộ timing:{" "}
+                  <strong className="text-zinc-200">+{rodInfo.windowBonusPct}%</strong>
+                </div>
+              </div>
+            ) : null}
             <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-[#18191a] px-3 py-2 text-xs text-zinc-300">
               <input
                 type="checkbox"
@@ -374,6 +502,38 @@ export default function FishingPage() {
           </div>
         </div>
       </section>
+
+      {/* Timing UI ở phía trên hồ cá */}
+      {attempt && phase === "timing" ? (
+        <div className="mb-4 rounded-xl border border-white/10 bg-[#18191a] p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm text-zinc-300">
+              Cá <strong className="text-white">{fishPretty(attempt.fishType)}</strong> · Timing window{" "}
+              <strong className="text-white">
+                {Math.max(0, attempt.timing.targetEndMs - attempt.timing.targetStartMs)}ms
+              </strong>
+            </div>
+            <div className="text-xs text-zinc-500">
+              Timing: {Math.round(attempt.timing.mechanicDurationMs / 100) / 10}s
+            </div>
+          </div>
+
+          <div className="mt-3 relative h-3 rounded-full bg-white/10">
+            <div className="absolute inset-0 overflow-hidden rounded-full">
+              <TimingIndicator attempt={attempt} mechanicStartTs={mechanicStartTs} onClick={onTimingClick} />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={submitting || mechanicStartTs == null || preTimingMs > 0}
+            onClick={() => onTimingClick()}
+            className="mt-4 w-full rounded-lg bg-[#E50914] px-4 py-2 text-sm font-semibold text-white hover:bg-[#f40612] disabled:opacity-50"
+          >
+            {preTimingMs > 0 ? `Chuẩn bị… ${Math.ceil(preTimingMs / 1000)}s` : "Bấm thả câu đúng lúc"}
+          </button>
+        </div>
+      ) : null}
 
       <section className="rounded-xl border border-white/10 bg-[#242526] p-5">
         <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-[#061a2d] to-[#050f1c] p-4">
@@ -438,6 +598,11 @@ export default function FishingPage() {
                       {Math.ceil(biteLeftMs / 1000)} giây
                     </div>
                   ) : null}
+                  {phase === "waiting" && preTimingMs > 0 ? (
+                    <div className="mt-1 text-zinc-200">
+                      Chuẩn bị timing… <span className="text-[#E50914]">{Math.ceil(preTimingMs / 1000)}s</span>
+                    </div>
+                  ) : null}
                   {phase === "timing" ? <div className="text-emerald-300">Bấm đúng lúc!</div> : null}
                   {phase === "answer" ? <div className="text-emerald-300">Trả lời nghĩa:</div> : null}
                   {phase === "result" && result ? (
@@ -452,37 +617,6 @@ export default function FishingPage() {
             <div className="flex h-[240px] items-center justify-center text-zinc-500">Thả mồi để bắt đầu.</div>
           )}
         </div>
-
-        {attempt && phase === "timing" ? (
-          <div className="mt-4 rounded-xl border border-white/10 bg-[#18191a] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-sm text-zinc-300">
-                Cá <strong className="text-white">{fishPretty(attempt.fishType)}</strong> · Timing window{" "}
-                <strong className="text-white">
-                  {Math.max(0, attempt.timing.targetEndMs - attempt.timing.targetStartMs)}ms
-                </strong>
-              </div>
-              <div className="text-xs text-zinc-500">
-                Timing: {Math.round(attempt.timing.mechanicDurationMs / 100) / 10}s
-              </div>
-            </div>
-
-            <div className="mt-3 relative h-3 rounded-full bg-white/10">
-              <div className="absolute inset-0 overflow-hidden rounded-full">
-                <TimingIndicator attempt={attempt} mechanicStartTs={mechanicStartTs} onClick={onTimingClick} />
-              </div>
-            </div>
-
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={() => onTimingClick()}
-              className="mt-4 w-full rounded-lg bg-[#E50914] px-4 py-2 text-sm font-semibold text-white hover:bg-[#f40612] disabled:opacity-50"
-            >
-              Bấm thả câu đúng lúc
-            </button>
-          </div>
-        ) : null}
 
         {attempt && phase === "answer" ? (
           <div className="mt-4 rounded-xl border border-white/10 bg-[#18191a] p-4">
@@ -579,6 +713,25 @@ export default function FishingPage() {
           </div>
         ) : null}
       </section>
+
+      {rankPopup ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="w-full max-w-sm rounded-2xl border border-white/20 bg-[#18191a] p-5 shadow-2xl">
+            <h2 className="mb-2 text-sm font-semibold text-zinc-300">Chúc mừng!</h2>
+            <p className={`text-xl font-bold ${rankPopup.color}`}>Bạn đã lên {rankPopup.to}</p>
+            <p className="mt-2 text-xs text-zinc-400">
+              Từ {rankPopup.from} → {rankPopup.to}. Tiếp tục học để lên rank cao hơn nữa.
+            </p>
+            <button
+              type="button"
+              onClick={() => setRankPopup(null)}
+              className="mt-4 w-full rounded-lg bg-[#E50914] px-3 py-2 text-sm font-semibold text-white hover:bg-[#f40612]"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -619,13 +772,15 @@ function TimingIndicator({
           width: `${Math.max(0, (targetRightPct - targetLeftPct) * 100)}%`,
         }}
       />
-      <div
-        className="absolute top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#E50914]"
-        style={{ left: `${pct * 100}%` }}
-        role="button"
-        tabIndex={0}
-        onClick={() => onClick()}
-      />
+      {mechanicStartTs != null ? (
+        <div
+          className="absolute top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#E50914]"
+          style={{ left: `${pct * 100}%` }}
+          role="button"
+          tabIndex={0}
+          onClick={() => onClick()}
+        />
+      ) : null}
     </>
   );
 }
