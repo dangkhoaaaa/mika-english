@@ -2,7 +2,7 @@
 
 export default function MessagesPage() {
   return (
-    <div className="mx-auto max-w-3xl px-3 py-16 text-center sm:px-4">
+    <div className="mx-auto max-w-[1300px] px-3 py-16 text-center sm:px-4">
       <div className="rounded-xl border border-white/10 bg-[#242526] p-12">
         <p className="text-4xl mb-4">💬</p>
         <h1 className="text-xl font-bold text-white">Tin nhắn</h1>

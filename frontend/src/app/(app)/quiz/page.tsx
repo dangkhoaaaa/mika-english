@@ -168,14 +168,14 @@ export default function QuizPage() {
 
   if (loadingVocab || loadingStats) {
     return (
-      <div className="mx-auto max-w-3xl px-3 py-16 text-center sm:px-4">
+      <div className="mx-auto max-w-[1300px] px-3 py-16 text-center sm:px-4">
         <p className="text-zinc-500">Đang tải…</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-3 py-8 sm:px-4">
+    <div className="mx-auto max-w-[1300px] px-3 py-8 sm:px-4">
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Quiz topic</span>
       </h1>

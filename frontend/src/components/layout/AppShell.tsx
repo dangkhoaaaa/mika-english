@@ -34,7 +34,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/home", label: "Bảng tin", icon: <FaHome /> },
-  { href: "/excel", label: "Import Excel", icon: <FaFileImport /> },
+  { href: "/excel", label: "Kho excel", icon: <FaFileImport /> },
   { href: "/vocabulary", label: "Từ vựng", icon: <FaBook /> },
   { href: "/flashcards", label: "Thêm từ / Import", icon: <FaPlus /> },
   { href: "/study", label: "Học thẻ", icon: <FaGamepad /> },
@@ -111,7 +111,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </span>
           </button>
 
-          <Link href="/home" className="shrink-0 text-xl font-bold tracking-tight">
+          <Link href="/home" className="shrink-0 text-xl font-bold tracking-tight lg:mr-auto">
             <span className="text-[#E50914]">Mika</span>
             <span className="text-white"> English</span>
           </Link>
@@ -138,10 +138,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-7xl">
+      <div className="mx-auto flex max-w-[1600px]">
         {/* Desktop sidebar */}
-        <aside className="hidden w-56 shrink-0 border-r border-white/10 pb-8 pt-4 lg:block">
-          <nav className="space-y-1 px-2">
+        <aside className="hidden h-[calc(100vh-3.5rem)] w-72 shrink-0 border-r border-white/10 pb-8 pt-4 lg:sticky lg:top-14 lg:block lg:overflow-y-auto">
+          <nav className="space-y-1 px-3">
             {navItems.map((item) => {
               const active = pathname === item.href || pathname.startsWith(item.href + "/");
               return (
@@ -149,7 +149,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.soon ? "#" : item.href}
                   onClick={(e) => item.soon && e.preventDefault()}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
+                  className={`flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] transition ${
                     active ? "bg-white/10 text-white" : "text-zinc-400 hover:bg-white/5 hover:text-white"
                   } ${item.soon ? "cursor-not-allowed opacity-60" : ""}`}
                 >

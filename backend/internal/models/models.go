@@ -220,3 +220,12 @@ type FishCatch struct {
 	CaughtAt time.Time `bson:"caughtAt" json:"caughtAt"`
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 }
+
+// ExcelShareItem — item trong Kho excel (user share link sheet).
+type ExcelShareItem struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	UserID    string             `bson:"userId" json:"userId"`
+	Title     string             `bson:"title" json:"title"`
+	SheetURL  string             `bson:"sheetUrl" json:"sheetUrl"`
+	CreatedAt time.Time          `bson:"createdAt" json:"createdAt"`
+}

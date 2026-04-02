@@ -115,7 +115,7 @@ export default function ProfileByIdPage() {
   }, [points, rankMilestonesSorted]);
 
   return (
-    <div className="mx-auto max-w-4xl px-3 py-8 sm:px-4">
+    <div className="mx-auto max-w-[1300px] px-3 py-8 sm:px-4">
       <h1 className="mb-4 text-2xl font-bold">
         <span className="text-[#E50914]">Profile người dùng</span>
       </h1>

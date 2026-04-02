@@ -411,7 +411,7 @@ export default function FishingPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-3xl px-3 py-16 text-center sm:px-4">
+      <div className="mx-auto max-w-[1300px] px-3 py-16 text-center sm:px-4">
         <p className="text-zinc-500">Đang tải…</p>
       </div>
     );
@@ -422,7 +422,7 @@ export default function FishingPage() {
   const fishAmplitudePx = 18 + fishSize * 6;
 
   return (
-    <div className="mx-auto max-w-3xl px-3 py-8 sm:px-4">
+    <div className="mx-auto max-w-[1300px] px-3 py-8 sm:px-4">
       <style jsx global>{`
         @keyframes swimAcross {
           0% {

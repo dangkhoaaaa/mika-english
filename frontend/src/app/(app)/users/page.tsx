@@ -54,7 +54,7 @@ export default function UsersPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-3xl px-3 py-8 sm:px-4">
+    <div className="mx-auto max-w-[1300px] px-3 py-8 sm:px-4">
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Tìm user</span>
       </h1>

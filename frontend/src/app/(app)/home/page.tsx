@@ -147,6 +147,7 @@ export default function HomePage() {
     lastCaughtAt?: string;
   } | null>(null);
   const [meUserId, setMeUserId] = useState<string>("");
+  const [topRanks, setTopRanks] = useState<Array<{ userId: string; displayName: string; avatarUrl?: string; points?: number }>>([]);
 
   const timeAgo = (iso?: string) => {
     if (!iso) return "";
@@ -207,6 +208,17 @@ export default function HomePage() {
         /* ignore */
       }
     })();
+    void (async () => {
+      const token = getAccessToken();
+      if (!token) return;
+      setAuthToken(token);
+      try {
+        const res = await api.get("/api/v1/leaderboard");
+        setTopRanks(Array.isArray(res.data?.topPoints) ? res.data.topPoints.slice(0, 10) : []);
+      } catch {
+        /* ignore */
+      }
+    })();
   }, []);
 
   const postText = async () => {
@@ -258,7 +270,9 @@ export default function HomePage() {
   }, [imageFile]);
 
   return (
-    <div className="mx-auto max-w-2xl px-3 py-4 pb-12 sm:px-4">
+    <div className="mx-auto max-w-[1300px] px-3 py-4 pb-12 sm:px-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
       {fishAchievements ? (
         <section className="mb-4 rounded-xl border border-white/10 bg-[#242526] p-4 shadow-lg">
           <div className="flex items-center justify-between gap-3">
@@ -536,6 +550,32 @@ export default function HomePage() {
             </div>
           </article>
         ))}
+      </div>
+      </div>
+
+      <aside className="hidden xl:block">
+        <div className="sticky top-20 rounded-xl border border-white/10 bg-[#242526] p-4">
+          <h3 className="mb-3 text-sm font-semibold text-white">Top rank (điểm)</h3>
+          <div className="space-y-2">
+            {topRanks.map((u, i) => (
+              <Link key={`${u.userId}-${i}`} href={`/profile/${encodeURIComponent(u.userId)}`} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
+                <span className="w-6 text-xs text-zinc-400">#{i + 1}</span>
+                <div className="h-8 w-8 overflow-hidden rounded-full bg-[#3a3b3c]">
+                  {u.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={u.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm text-zinc-200">{u.displayName}</p>
+                </div>
+                <span className="text-xs text-[#E50914]">{u.points ?? 0}</span>
+              </Link>
+            ))}
+            {topRanks.length === 0 ? <p className="text-xs text-zinc-500">Chưa có dữ liệu.</p> : null}
+          </div>
+        </div>
+      </aside>
       </div>
     </div>
   );

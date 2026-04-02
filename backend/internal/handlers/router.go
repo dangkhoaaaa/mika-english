@@ -52,6 +52,7 @@ func NewRouter() http.Handler {
 	quizRepo := repositories.NewQuizRepository(database)
 	inactivityRepo := repositories.NewInactivityReminderRepository(database)
 	fishingRepo := repositories.NewFishingRepository(database)
+	excelShareRepo := repositories.NewExcelShareRepository(database)
 	tokenRepo := repositories.NewTokenRepository(database)
 	newsRepo := repositories.NewNewsRepository(database)
 
@@ -68,6 +69,7 @@ func NewRouter() http.Handler {
 	newsService := services.NewNewsService(newsRepo)
 	leaderboardService := services.NewLeaderboardService(statsRepo, fishingRepo, userRepo)
 	profileService := services.NewProfileService(userRepo, statsRepo, newsRepo, fishingRepo)
+	excelLibraryService := services.NewExcelLibraryService(excelShareRepo, userRepo)
 
 	go func() {
 		ticker := time.NewTicker(1 * time.Minute)
@@ -770,6 +772,34 @@ func NewRouter() http.Handler {
 			return
 		}
 		writeJSON(w, http.StatusOK, users)
+	}))
+
+	mux.HandleFunc("/api/v1/excel-library", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
+		uid := getUserID(r.Context())
+		switch r.Method {
+		case http.MethodGet:
+			page, _ := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
+			limit, _ := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
+			resp, err := excelLibraryService.ListPaged(r.Context(), page, limit)
+			if err != nil {
+				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+				return
+			}
+			writeJSON(w, http.StatusOK, resp)
+		case http.MethodPost:
+			var in services.ExcelLibraryShareInput
+			if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+				writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid payload"})
+				return
+			}
+			if err := excelLibraryService.Share(r.Context(), uid, in); err != nil {
+				writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+				return
+			}
+			writeJSON(w, http.StatusCreated, map[string]any{"ok": true})
+		default:
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+		}
 	}))
 
 	mux.HandleFunc("/api/v1/news", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {

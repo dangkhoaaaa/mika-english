@@ -110,11 +110,11 @@ export function LoginForm() {
             <span className="text-[#E50914]">Mika</span> English
           </h1>
           <p className="mt-4 text-lg text-zinc-300 sm:text-xl">
-            Đăng nhập để vào bảng tin, học từ vựng và flashcard — tông màu Netflix.
+            Đăng nhập để vào bảng tin, học từ vựng và flashcard.
           </p>
           <ul className="mt-6 space-y-2 text-sm text-zinc-400">
-            <li>• Bảng tin kiểu Facebook (dark)</li>
-            <li>• Menu trái: Excel, từ vựng, flashcard, tin nhắn…</li>
+            <li>• Học từ vựng theo cách của bạn.</li>
+            <li>• Excel, từ vựng, flashcard, tin nhắn, trò chơi…</li>
           </ul>
         </div>
 
