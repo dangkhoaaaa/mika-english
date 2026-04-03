@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, setAuthToken } from "@/lib/api";
-import { clearSession, getAccessToken, getRefreshToken } from "@/lib/session";
+import { getAccessToken } from "@/lib/session";
 import { WakeupPing } from "@/components/infra/WakeupPing";
+import { UserMenu } from "@/components/layout/UserMenu";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import type { ReactNode } from "react";
 import {
   FaHome,
@@ -52,10 +54,11 @@ const navItems: NavItem[] = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const { theme } = useTheme();
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
   const [coins, setCoins] = useState<number>(0);
+  const isLight = theme === "light";
 
   const refreshCoins = async () => {
     const access = getAccessToken();
@@ -78,69 +81,70 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const logout = async () => {
-    const refresh = getRefreshToken();
-    const access = getAccessToken();
-    setAuthToken(access);
-    try {
-      if (refresh) await api.post("/api/v1/auth/logout", { refreshToken: refresh });
-    } catch {
-      /* ignore */
-    }
-    clearSession();
-    setAuthToken(undefined);
-    router.replace("/login");
-  };
-
   return (
-    <div className="min-h-screen bg-[#141414] text-white">
+    <div
+      className={`min-h-screen ${isLight ? "bg-zinc-200 text-zinc-900" : "bg-[var(--mika-bg-page)] text-[var(--mika-fg)]"}`}
+    >
       <WakeupPing />
       {/* Top bar — Facebook-like + Netflix tone */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#141414]/95 backdrop-blur">
+      <header
+        className={`sticky top-0 z-40 border-b backdrop-blur ${
+          isLight ? "border-zinc-200 bg-white/95" : "border-[color:var(--mika-border)] bg-[var(--mika-bg-page)]/95"
+        }`}
+      >
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-3 sm:px-4">
           <button
             type="button"
             aria-label="Mở menu"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg hover:bg-white/10"
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+              isLight ? "hover:bg-zinc-200" : "hover:bg-white/10"
+            }`}
             onClick={() => setOpen(true)}
           >
             <span className="flex flex-col gap-1.5">
-              <span className="h-0.5 w-6 rounded bg-white" />
-              <span className="h-0.5 w-6 rounded bg-white" />
-              <span className="h-0.5 w-6 rounded bg-white" />
+              <span className={`h-0.5 w-6 rounded ${isLight ? "bg-zinc-800" : "bg-white"}`} />
+              <span className={`h-0.5 w-6 rounded ${isLight ? "bg-zinc-800" : "bg-white"}`} />
+              <span className={`h-0.5 w-6 rounded ${isLight ? "bg-zinc-800" : "bg-white"}`} />
             </span>
           </button>
 
           <Link href="/home" className="shrink-0 text-xl font-bold tracking-tight lg:mr-auto">
             <span className="text-[#E50914]">Mika</span>
-            <span className="text-white"> English</span>
+            <span className={isLight ? "text-zinc-900" : "text-[var(--mika-fg)]"}> English</span>
           </Link>
 
           <div className="mx-auto hidden max-w-md flex-1 sm:block">
-            <div className="rounded-full bg-[#3a3a3a] px-4 py-2 text-sm text-zinc-400">
+            <div
+              className={`rounded-full px-4 py-2 text-sm ${
+                isLight ? "bg-zinc-200 text-zinc-500" : "bg-[var(--mika-input)] text-[var(--mika-fg-muted)]"
+              }`}
+            >
               Tìm kiếm trên Mika English…
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="rounded-full border border-yellow-400/30 bg-yellow-950/30 px-3 py-1 text-sm text-yellow-200">
+            <div
+              className={`rounded-full border px-3 py-1 text-sm ${
+                isLight
+                  ? "border-amber-300/80 bg-amber-50 text-amber-900"
+                  : "border-yellow-400/30 bg-yellow-950/30 text-yellow-200"
+              }`}
+            >
               💰 {coins}
             </div>
+            <UserMenu />
           </div>
-
-          <button
-            type="button"
-            onClick={() => void logout()}
-            className="shrink-0 rounded-lg border border-white/20 px-3 py-1.5 text-sm hover:bg-white/10"
-          >
-            Đăng xuất
-          </button>
         </div>
       </header>
 
       <div className="mx-auto flex max-w-[1600px]">
         {/* Desktop sidebar */}
-        <aside className="hidden h-[calc(100vh-3.5rem)] w-72 shrink-0 border-r border-white/10 pb-8 pt-4 lg:sticky lg:top-14 lg:block lg:overflow-y-auto">
+        <aside
+          className={`hidden h-[calc(100vh-3.5rem)] w-72 shrink-0 border-r pb-8 pt-4 lg:sticky lg:top-14 lg:block lg:overflow-y-auto ${
+            isLight ? "border-zinc-200 bg-zinc-100" : "border-[color:var(--mika-border)] bg-[var(--mika-bg-page)]"
+          }`}
+        >
           <nav className="space-y-1 px-3">
             {navItems.map((item) => {
               const active = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -150,7 +154,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={item.soon ? "#" : item.href}
                   onClick={(e) => item.soon && e.preventDefault()}
                   className={`flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] transition ${
-                    active ? "bg-white/10 text-white" : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                    active
+                      ? isLight
+                        ? "bg-zinc-200 text-zinc-900"
+                        : "bg-white/10 text-[var(--mika-fg)]"
+                      : isLight
+                        ? "text-zinc-600 hover:bg-zinc-200/80 hover:text-zinc-900"
+                        : "text-[var(--mika-fg-muted)] hover:bg-white/5 hover:text-[var(--mika-fg)]"
                   } ${item.soon ? "cursor-not-allowed opacity-60" : ""}`}
                 >
                   <span className="text-lg">{item.icon}</span>
@@ -177,14 +187,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             aria-label="Đóng menu"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 top-0 h-full w-[min(85vw,280px)] border-r border-white/10 bg-[#181818] p-4 shadow-xl">
+          <div
+            className={`absolute left-0 top-0 h-full w-[min(85vw,280px)] border-r p-4 shadow-xl ${
+              isLight ? "border-zinc-200 bg-white text-zinc-900" : "border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] text-[var(--mika-fg)]"
+            }`}
+          >
             <div className="mb-6 flex items-center justify-between">
-              <span className="text-lg font-bold">
+              <span className={`text-lg font-bold ${isLight ? "text-zinc-900" : "text-[var(--mika-fg)]"}`}>
                 <span className="text-[#E50914]">Mika</span> English
               </span>
               <button
                 type="button"
-                className="rounded p-2 hover:bg-white/10"
+                className={`rounded p-2 ${isLight ? "hover:bg-zinc-100" : "hover:bg-white/10"}`}
                 onClick={() => setOpen(false)}
                 aria-label="Đóng"
               >
@@ -201,7 +215,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     else setOpen(false);
                   }}
                   className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm ${
-                    pathname === item.href ? "bg-white/10" : "hover:bg-white/5"
+                    pathname === item.href
+                      ? isLight
+                        ? "bg-zinc-200 text-zinc-900"
+                        : "bg-white/10 text-[var(--mika-fg)]"
+                      : isLight
+                        ? "text-zinc-700 hover:bg-zinc-100"
+                        : "text-[var(--mika-fg-muted)] hover:bg-white/5 hover:text-[var(--mika-fg)]"
                   } ${item.soon ? "cursor-not-allowed opacity-60" : ""}`}
                 >
                   <span>{item.icon}</span>

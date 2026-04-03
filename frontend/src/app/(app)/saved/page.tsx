@@ -5,7 +5,7 @@ import { api, setAuthToken } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
 import { mapVocabFromApi } from "@/lib/vocabFromApi";
 import type { VocabularyItem } from "@/lib/types";
-import { speakEnglish, speakVietnamese } from "@/lib/speech";
+import { speakMeaning, speakVocab } from "@/lib/speech";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 type ReminderDto = {
@@ -138,23 +138,23 @@ export default function SavedVocabularyPage() {
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Từ đã lưu</span> (ôn khó)
       </h1>
-      <p className="mb-6 text-sm text-zinc-500">
+      <p className="mb-6 text-sm text-[var(--mika-fg-subtle)]">
         Từ bạn đánh dấu từ mục Từ vựng / Học thẻ. Có thể bật nhắc qua email theo lịch.
       </p>
 
-      {loading && <p className="text-zinc-500">Đang tải…</p>}
+      {loading && <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p>}
 
       <section className="mb-8 space-y-2">
         {!loading && items.length === 0 && (
-          <p className="rounded-xl bg-[#242526] p-8 text-center text-zinc-500">
-            Chưa có từ nào được lưu. Vào <strong className="text-white">Từ vựng</strong> hoặc{" "}
-            <strong className="text-white">Học thẻ</strong> và bấm &quot;Lưu từ&quot;.
+          <p className="rounded-xl bg-[var(--mika-surface)] p-8 text-center text-[var(--mika-fg-subtle)]">
+            Chưa có từ nào được lưu. Vào <strong className="text-[var(--mika-fg)]">Từ vựng</strong> hoặc{" "}
+            <strong className="text-[var(--mika-fg)]">Học thẻ</strong> và bấm &quot;Lưu từ&quot;.
           </p>
         )}
         {items.map((item) => (
           <article
             key={item.id}
-            className="flex flex-col gap-3 rounded-xl border border-white/10 bg-[#242526] p-4 sm:flex-row sm:items-start sm:justify-between"
+            className="flex flex-col gap-3 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4 sm:flex-row sm:items-start sm:justify-between"
           >
             <div className="min-w-0 flex-1">
               {item.topic ? (
@@ -162,24 +162,24 @@ export default function SavedVocabularyPage() {
                   {item.topic}
                 </p>
               ) : null}
-              <p className="font-semibold text-white">{item.vocabulary}</p>
-              <p className="text-sm text-zinc-400">{item.meaning}</p>
+              <p className="font-semibold text-[var(--mika-fg)]">{item.vocabulary}</p>
+              <p className="text-sm text-[var(--mika-fg-muted)]">{item.meaning}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="rounded bg-[#3a3b3c] px-2 py-1 text-xs text-zinc-200 hover:bg-[#4e4f50]"
-                  onClick={() => speakEnglish(item.vocabulary)}
+                  className="rounded bg-[var(--mika-input)] px-2 py-1 text-xs text-[var(--mika-fg)] hover:bg-[var(--mika-input-hover)]"
+                  onClick={() => speakVocab(item.vocabulary)}
                 >
                   🔊 EN
                 </button>
                 <button
                   type="button"
-                  className="rounded bg-[#3a3b3c] px-2 py-1 text-xs text-zinc-200 hover:bg-[#4e4f50]"
-                  onClick={() => speakVietnamese(item.meaning)}
+                  className="rounded bg-[var(--mika-input)] px-2 py-1 text-xs text-[var(--mika-fg)] hover:bg-[var(--mika-input-hover)]"
+                  onClick={() => speakMeaning(item.meaning)}
                 >
                   🔊 VI
                 </button>
-                <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-400">
+                <label className="flex cursor-pointer items-center gap-2 text-xs text-[var(--mika-fg-muted)]">
                   <input
                     type="checkbox"
                     checked={selectedForMail.has(item.id)}
@@ -191,7 +191,7 @@ export default function SavedVocabularyPage() {
             </div>
             <button
               type="button"
-              className="shrink-0 rounded-lg border border-white/20 px-3 py-1.5 text-sm hover:bg-white/5"
+              className="shrink-0 rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-1.5 text-sm hover:bg-white/5"
               onClick={() => setConfirmRemoveId(item.id)}
             >
               Bỏ lưu
@@ -200,9 +200,9 @@ export default function SavedVocabularyPage() {
         ))}
       </section>
 
-      <section className="rounded-xl border border-white/10 bg-[#181818] p-5">
-        <h2 className="text-lg font-semibold text-white">Nhắc qua email</h2>
-        <p className="mt-1 text-xs text-zinc-500">
+      <section className="rounded-xl border border-[color:var(--mika-border)] bg-[#181818] p-5">
+        <h2 className="text-lg font-semibold text-[var(--mika-fg)]">Nhắc qua email</h2>
+        <p className="mt-1 text-xs text-[var(--mika-fg-subtle)]">
           Cấu hình SMTP trên server (SMTP_HOST, SMTP_USER, …). Không cấu hình thì lịch vẫn chạy nhưng không gửi được mail.
         </p>
         <form
@@ -211,23 +211,23 @@ export default function SavedVocabularyPage() {
           onSubmit={(e) => void saveReminder(e)}
         >
           <div>
-            <label className="text-sm text-zinc-400">Email nhận nhắc</label>
+            <label className="text-sm text-[var(--mika-fg-muted)]">Email nhận nhắc</label>
             <input
               name="notifyEmail"
               type="email"
               required
               defaultValue={reminder?.notifyEmail ?? ""}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+              className="mt-1 w-full rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
               placeholder="you@example.com"
             />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="text-sm text-zinc-400">Tần suất</label>
+              <label className="text-sm text-[var(--mika-fg-muted)]">Tần suất</label>
               <select
                 name="schedule"
                 defaultValue={reminder?.schedule ?? "daily"}
-                className="mt-1 w-full rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+                className="mt-1 w-full rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
               >
                 <option value="hourly">Mỗi giờ</option>
                 <option value="daily">Mỗi ngày</option>
@@ -236,35 +236,35 @@ export default function SavedVocabularyPage() {
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-sm text-zinc-400">Giờ</label>
+                <label className="text-sm text-[var(--mika-fg-muted)]">Giờ</label>
                 <input
                   name="hour"
                   type="number"
                   min={0}
                   max={23}
                   defaultValue={reminder?.hour ?? 8}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+                  className="mt-1 w-full rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
                 />
               </div>
               <div className="flex-1">
-                <label className="text-sm text-zinc-400">Phút</label>
+                <label className="text-sm text-[var(--mika-fg-muted)]">Phút</label>
                 <input
                   name="minute"
                   type="number"
                   min={0}
                   max={59}
                   defaultValue={reminder?.minute ?? 0}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+                  className="mt-1 w-full rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
                 />
               </div>
             </div>
           </div>
           <div>
-            <label className="text-sm text-zinc-400">Ngày trong tuần (chỉ khi &quot;Mỗi tuần&quot;)</label>
+            <label className="text-sm text-[var(--mika-fg-muted)]">Ngày trong tuần (chỉ khi &quot;Mỗi tuần&quot;)</label>
             <select
               name="weekday"
               defaultValue={reminder?.weekday ?? 1}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+              className="mt-1 w-full rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
             >
               {WEEKDAYS.map((d) => (
                 <option key={d.v} value={d.v}>
@@ -273,12 +273,12 @@ export default function SavedVocabularyPage() {
               ))}
             </select>
           </div>
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
+          <label className="flex items-center gap-2 text-sm text-[var(--mika-fg-muted)]">
             <input type="checkbox" name="enabled" defaultChecked={reminder?.enabled !== false} />
             Bật nhắc tự động
           </label>
           {reminder?.nextRunAt && (
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-[var(--mika-fg-subtle)]">
               Lần chạy tiếp (UTC): {new Date(reminder.nextRunAt).toLocaleString("vi-VN")}
             </p>
           )}
@@ -293,7 +293,7 @@ export default function SavedVocabularyPage() {
             {reminder && (
               <button
                 type="button"
-                className="rounded-lg border border-white/20 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5"
+                className="rounded-lg border border-[color:var(--mika-border-strong)] px-4 py-2 text-sm text-[var(--mika-fg-muted)] hover:bg-white/5"
                 onClick={() => setConfirmDeleteReminder(true)}
               >
                 Xóa lịch nhắc

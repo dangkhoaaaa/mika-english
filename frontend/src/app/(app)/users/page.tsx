@@ -58,13 +58,13 @@ export default function UsersPage() {
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Tìm user</span>
       </h1>
-      <p className="mb-4 text-sm text-zinc-500">Tìm theo tên hiển thị hoặc email.</p>
+      <p className="mb-4 text-sm text-[var(--mika-fg-subtle)]">Tìm theo tên hiển thị hoặc email.</p>
 
       <div className="mb-5 flex gap-2">
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className="flex-1 rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm"
+          className="flex-1 rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm"
           placeholder="Nhập tên hoặc email..."
         />
         <button
@@ -80,32 +80,32 @@ export default function UsersPage() {
 
       <section className="space-y-2">
         {rows.map((u) => (
-          <article key={u.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-[#242526] p-4">
+          <article key={u.id} className="flex items-center justify-between rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#18191a]">
+              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)]">
                 {u.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={u.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs font-bold text-zinc-300">
+                  <div className="flex h-full w-full items-center justify-center text-xs font-bold text-[var(--mika-fg-muted)]">
                     {(u.displayName || "U").slice(0, 1).toUpperCase()}
                   </div>
                 )}
               </div>
               <div className="min-w-0">
-                <p className="truncate font-medium text-white">{u.displayName || `user_${u.id.slice(0, 6)}`}</p>
-                <p className="truncate text-xs text-zinc-500">{maskEmailHideFirst5(u.email)}</p>
+                <p className="truncate font-medium text-[var(--mika-fg)]">{u.displayName || `user_${u.id.slice(0, 6)}`}</p>
+                <p className="truncate text-xs text-[var(--mika-fg-subtle)]">{maskEmailHideFirst5(u.email)}</p>
               </div>
             </div>
             <Link
               href={`/profile/${encodeURIComponent(u.id)}`}
-              className="rounded-lg border border-white/20 px-3 py-1.5 text-sm text-zinc-200 hover:bg-white/5"
+              className="rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-1.5 text-sm text-[var(--mika-fg)] hover:bg-white/5"
             >
               Xem profile
             </Link>
           </article>
         ))}
-        {rows.length === 0 ? <p className="text-zinc-500">Chưa có kết quả.</p> : null}
+        {rows.length === 0 ? <p className="text-[var(--mika-fg-subtle)]">Chưa có kết quả.</p> : null}
       </section>
     </div>
   );

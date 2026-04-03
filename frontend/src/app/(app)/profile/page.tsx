@@ -32,9 +32,9 @@ type ProfileData = {
 };
 
 const rankMilestones = [
-  { name: "Đồng III", min: 0, color: "text-zinc-300" },
-  { name: "Đồng II", min: 66, color: "text-zinc-300" },
-  { name: "Đồng I", min: 132, color: "text-zinc-300" },
+  { name: "Đồng III", min: 0, color: "text-[var(--mika-fg-muted)]" },
+  { name: "Đồng II", min: 66, color: "text-[var(--mika-fg-muted)]" },
+  { name: "Đồng I", min: 132, color: "text-[var(--mika-fg-muted)]" },
 
   { name: "Bạc III", min: 200, color: "text-slate-200" },
   { name: "Bạc II", min: 300, color: "text-slate-200" },
@@ -143,13 +143,13 @@ export default function ProfilePage() {
         <span className="text-[#E50914]">Trang cá nhân</span>
       </h1>
 
-      {loading ? <p className="text-zinc-500">Đang tải…</p> : null}
+      {loading ? <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p> : null}
       {error ? <p className="rounded-lg bg-red-950/40 p-3 text-sm text-red-200">{error}</p> : null}
 
       {!loading && !error ? (
         <>
-          <section className="mb-4 rounded-xl border border-white/10 bg-[#242526] p-5">
-            <div className="mb-4 overflow-hidden rounded-xl border border-white/10">
+          <section className="mb-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-5">
+            <div className="mb-4 overflow-hidden rounded-xl border border-[color:var(--mika-border)]">
               <div className="h-36 bg-gradient-to-r from-[#2b3245] via-[#3f2745] to-[#513315]">
                 {data?.user?.coverUrl ? (
                   <img src={data.user.coverUrl} alt="cover" className="h-full w-full object-cover" />
@@ -157,7 +157,7 @@ export default function ProfilePage() {
               </div>
               <div className="px-4 pb-3 pt-2">
                 <div className="flex items-center gap-3">
-                  <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-white/20 bg-[#1f1f1f]">
+                  <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[color:var(--mika-border-strong)] bg-[#1f1f1f]">
                     {data?.user?.avatarUrl ? (
                       <img src={data.user.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
                     ) : (
@@ -165,8 +165,8 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-white">{data?.user?.displayName || "Người học English"}</p>
-                    <p className="text-xs text-zinc-500">{data?.user?.email || "—"}</p>
+                    <p className="text-lg font-semibold text-[var(--mika-fg)]">{data?.user?.displayName || "Người học English"}</p>
+                    <p className="text-xs text-[var(--mika-fg-subtle)]">{data?.user?.email || "—"}</p>
                   </div>
                 </div>
               </div>
@@ -178,52 +178,52 @@ export default function ProfilePage() {
                   <input
                     value={displayNameDraft}
                     onChange={(e) => setDisplayNameDraft(e.target.value)}
-                    className="rounded-lg border border-white/10 bg-[#18191a] px-3 py-1.5 text-sm"
+                    className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] px-3 py-1.5 text-sm"
                     placeholder="Tên hiển thị"
                   />
                   <button
                     type="button"
                     disabled={saving}
-                    className="rounded-lg border border-white/20 px-3 py-1.5 text-sm text-zinc-200 disabled:opacity-50"
+                    className="rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-1.5 text-sm text-[var(--mika-fg)] disabled:opacity-50"
                     onClick={() => void updateProfile({ displayName: displayNameDraft.trim() })}
                   >
                     Lưu tên
                   </button>
                 </div>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[#18191a] px-4 py-2 text-right">
-                <p className="text-xs text-zinc-500">Rank hiện tại</p>
+              <div className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] px-4 py-2 text-right">
+                <p className="text-xs text-[var(--mika-fg-subtle)]">Rank hiện tại</p>
                 <p className={`text-lg font-bold ${currentStep?.color ?? "text-[#E50914]"}`}>
                   {currentStep?.name ?? currentRank}
                 </p>
-                <p className="text-xs text-zinc-400">{points} điểm</p>
+                <p className="text-xs text-[var(--mika-fg-muted)]">{points} điểm</p>
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <label className="cursor-pointer rounded-lg border border-white/20 px-3 py-1.5 text-sm text-zinc-200 hover:bg-white/5">
+              <label className="cursor-pointer rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-1.5 text-sm text-[var(--mika-fg)] hover:bg-white/5">
                 Đổi avatar
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => void onUploadAvatar(e.target.files?.[0])} />
               </label>
-              <label className="cursor-pointer rounded-lg border border-white/20 px-3 py-1.5 text-sm text-zinc-200 hover:bg-white/5">
+              <label className="cursor-pointer rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-1.5 text-sm text-[var(--mika-fg)] hover:bg-white/5">
                 Đổi cover
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => void onUploadCover(e.target.files?.[0])} />
               </label>
             </div>
 
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <div className="rounded-lg bg-[#18191a] p-3 text-sm text-zinc-300">
-                Streak: <strong className="text-white">{data?.stats?.streakDays ?? 0}</strong> ngày
+              <div className="rounded-lg bg-[var(--mika-surface-muted)] p-3 text-sm text-[var(--mika-fg-muted)]">
+                Streak: <strong className="text-[var(--mika-fg)]">{data?.stats?.streakDays ?? 0}</strong> ngày
               </div>
-              <div className="rounded-lg bg-[#18191a] p-3 text-sm text-zinc-300">
-                Cá unique: <strong className="text-white">{data?.fishSummary?.totalUnique ?? 0}</strong>
+              <div className="rounded-lg bg-[var(--mika-surface-muted)] p-3 text-sm text-[var(--mika-fg-muted)]">
+                Cá unique: <strong className="text-[var(--mika-fg)]">{data?.fishSummary?.totalUnique ?? 0}</strong>
               </div>
-              <div className="rounded-lg bg-[#18191a] p-3 text-sm text-zinc-300">
-                Tổng cá: <strong className="text-white">{data?.fishSummary?.totalCatches ?? 0}</strong>
+              <div className="rounded-lg bg-[var(--mika-surface-muted)] p-3 text-sm text-[var(--mika-fg-muted)]">
+                Tổng cá: <strong className="text-[var(--mika-fg)]">{data?.fishSummary?.totalCatches ?? 0}</strong>
               </div>
             </div>
 
-            <div className="mt-5 rounded-xl border border-white/10 bg-[#18191a] p-4">
-              <h2 className="mb-3 text-sm font-semibold text-zinc-200">Lộ trình rank</h2>
+            <div className="mt-5 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] p-4">
+              <h2 className="mb-3 text-sm font-semibold text-[var(--mika-fg)]">Lộ trình rank</h2>
               <div className="space-y-2">
                 {rankMilestonesSorted.map((r) => {
                   const active = currentStep?.name === r.name;
@@ -231,31 +231,31 @@ export default function ProfilePage() {
                     <div
                       key={r.name}
                       className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                        active ? "border border-white/20 bg-white/5" : "bg-black/20"
+                        active ? "border border-[color:var(--mika-border-strong)] bg-white/5" : "bg-black/20"
                       }`}
                     >
                       <span className={`font-medium ${r.color}`}>{r.name}</span>
-                      <span className="text-xs text-zinc-400">{`>= ${r.min} điểm`}</span>
+                      <span className="text-xs text-[var(--mika-fg-muted)]">{`>= ${r.min} điểm`}</span>
                     </div>
                   );
                 })}
               </div>
-              <p className="mt-3 text-xs text-zinc-500">
+              <p className="mt-3 text-xs text-[var(--mika-fg-subtle)]">
                 {next ? `Mốc tiếp theo: ${next.name} (cần ${next.min - points} điểm nữa)` : "Bạn đã đạt mốc cao nhất!"}
               </p>
             </div>
           </section>
 
-          <section className="rounded-xl border border-white/10 bg-[#242526] p-5">
-            <h2 className="mb-3 text-lg font-semibold text-white">Bài đăng của tôi</h2>
+          <section className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-5">
+            <h2 className="mb-3 text-lg font-semibold text-[var(--mika-fg)]">Bài đăng của tôi</h2>
             {(data?.posts ?? []).length === 0 ? (
-              <p className="text-zinc-500">Bạn chưa có bài đăng nào.</p>
+              <p className="text-[var(--mika-fg-subtle)]">Bạn chưa có bài đăng nào.</p>
             ) : (
               <div className="space-y-3">
                 {(data?.posts ?? []).map((p) => (
-                  <article key={p.id} className="rounded-lg border border-white/10 bg-[#18191a] p-4">
-                    <p className="text-sm text-zinc-100">{p.content}</p>
-                    <p className="mt-2 text-xs text-zinc-500">❤️ {p.likes} lượt thích</p>
+                  <article key={p.id} className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] p-4">
+                    <p className="text-sm text-[var(--mika-fg)]">{p.content}</p>
+                    <p className="mt-2 text-xs text-[var(--mika-fg-subtle)]">❤️ {p.likes} lượt thích</p>
                   </article>
                 ))}
               </div>

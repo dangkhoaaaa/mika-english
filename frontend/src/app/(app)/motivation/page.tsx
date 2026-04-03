@@ -83,7 +83,7 @@ export default function MotivationPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-[1300px] px-3 py-16 text-center sm:px-4">
-        <p className="text-zinc-500">Đang tải…</p>
+        <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p>
       </div>
     );
   }
@@ -93,7 +93,7 @@ export default function MotivationPage() {
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Động lực</span> (nhắc mail inactivity)
       </h1>
-      <p className="mb-6 text-sm text-zinc-500">
+      <p className="mb-6 text-sm text-[var(--mika-fg-subtle)]">
         Nếu bạn không quiz/check-in trong thời gian quy định, hệ thống sẽ tự gửi email nhắc học lại.
       </p>
 
@@ -108,30 +108,30 @@ export default function MotivationPage() {
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-white/10 bg-[#242526] p-6">
+      <section className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-zinc-400">Email nhận nhắc</label>
+            <label className="block text-sm text-[var(--mika-fg-muted)]">Email nhận nhắc</label>
             <input
               value={notifyEmail}
               onChange={(e) => setNotifyEmail(e.target.value)}
               type="email"
-              className="mt-1 w-full rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+              className="mt-1 w-full rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
               placeholder="you@example.com"
             />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
+          <label className="flex items-center gap-2 text-sm text-[var(--mika-fg-muted)]">
             <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
             Bật nhắc động lực
           </label>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-[#18191a] px-3 py-2 text-sm text-zinc-300">
+            <label className="flex items-center gap-2 rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] px-3 py-2 text-sm text-[var(--mika-fg-muted)]">
               <input type="checkbox" checked={interval7} onChange={(e) => setInterval7(e.target.checked)} />
               Sau 7 ngày không hoạt động
             </label>
-            <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-[#18191a] px-3 py-2 text-sm text-zinc-300">
+            <label className="flex items-center gap-2 rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] px-3 py-2 text-sm text-[var(--mika-fg-muted)]">
               <input type="checkbox" checked={interval30} onChange={(e) => setInterval30(e.target.checked)} />
               Sau 30 ngày không hoạt động
             </label>
@@ -148,7 +148,7 @@ export default function MotivationPage() {
             </button>
           </div>
 
-          <div className="text-xs text-zinc-500">
+          <div className="text-xs text-[var(--mika-fg-subtle)]">
             Lưu ý: “Không hoạt động” được tính theo các hành động hiện có (quiz & điểm danh). Nếu bạn muốn tính cả khi vào Study/Vocabulary, mình sẽ thêm cơ chế “ping activity” từ FE.
           </div>
         </div>

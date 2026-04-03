@@ -274,16 +274,16 @@ export default function HomePage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div>
       {fishAchievements ? (
-        <section className="mb-4 rounded-xl border border-white/10 bg-[#242526] p-4 shadow-lg">
+        <section className="mb-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4 shadow-lg">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🎣</span>
-                <h2 className="text-base font-semibold text-white">Thành tựu câu cá</h2>
+                <h2 className="text-base font-semibold text-[var(--mika-fg)]">Thành tựu câu cá</h2>
               </div>
-              <p className="mt-1 text-xs text-zinc-400">
-                Unique: <strong className="text-white">{fishAchievements.totalUnique}</strong> · Tổng cá:{" "}
-                <strong className="text-white">{fishAchievements.totalCatches}</strong>
+              <p className="mt-1 text-xs text-[var(--mika-fg-muted)]">
+                Unique: <strong className="text-[var(--mika-fg)]">{fishAchievements.totalUnique}</strong> · Tổng cá:{" "}
+                <strong className="text-[var(--mika-fg)]">{fishAchievements.totalCatches}</strong>
               </p>
             </div>
             <span className="rounded-full bg-[#E50914]/15 px-3 py-1 text-xs text-[#E50914]">
@@ -294,8 +294,8 @@ export default function HomePage() {
             {Object.entries(fishAchievements.countsByType ?? {})
               .sort((a, b) => a[0].localeCompare(b[0]))
               .map(([t, n]) => (
-                <span key={t} className="rounded-full border border-white/10 bg-[#18191a] px-3 py-1 text-xs text-zinc-200">
-                  {t}: <strong className="text-white">{n}</strong>
+                <span key={t} className="rounded-full border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] px-3 py-1 text-xs text-[var(--mika-fg-muted)]">
+                  {t}: <strong className="text-[var(--mika-fg)]">{n}</strong>
                 </span>
               ))}
           </div>
@@ -303,23 +303,23 @@ export default function HomePage() {
       ) : null}
 
       {/* Composer — kiểu Facebook */}
-      <section className="mb-4 rounded-xl border border-white/10 bg-[#242526] p-4 shadow-lg">
+      <section className="mb-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4 shadow-lg">
         <div className="mb-3 flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#E50914] to-[#831010] text-sm font-bold">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#E50914] to-[#831010] text-sm font-bold text-white">
             ME
           </div>
           <input
-            className="flex-1 rounded-full border-0 bg-[#3a3b3c] px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#E50914]/50"
+            className="flex-1 rounded-full border-0 bg-[var(--mika-input)] px-4 py-2.5 text-sm text-[var(--mika-fg)] placeholder:text-[var(--mika-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-[#E50914]/50"
             placeholder="Bạn đang nghĩ gì? (English)"
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
         </div>
-        <div className="flex items-center justify-end gap-2 border-t border-white/10 pt-3">
+        <div className="flex items-center justify-end gap-2 border-t border-[color:var(--mika-border)] pt-3">
           <button
             type="button"
             disabled={posting || !content.trim()}
-            className="rounded-lg bg-white/5 px-5 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-white/5 px-5 py-2 text-sm font-semibold text-[var(--mika-fg)] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => void postText()}
           >
             {posting ? "Đang đăng..." : "Đăng"}
@@ -334,7 +334,7 @@ export default function HomePage() {
           </button>
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <label className="cursor-pointer rounded-lg border border-white/15 px-3 py-1 text-xs text-zinc-300 hover:bg-white/5">
+          <label className="cursor-pointer rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-1 text-xs text-[var(--mika-fg-muted)] hover:bg-white/5">
             Ảnh đính kèm
             <input
               type="file"
@@ -344,7 +344,7 @@ export default function HomePage() {
             />
           </label>
           {imagePreviewUrl ? (
-            <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-white/15 bg-[#18191a]">
+            <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[color:var(--mika-border-strong)] bg-[var(--mika-surface-muted)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imagePreviewUrl} alt="preview" className="h-full w-full object-cover" />
               <button
@@ -360,40 +360,40 @@ export default function HomePage() {
         </div>
       </section>
 
-      {loading && <p className="py-8 text-center text-zinc-500">Đang tải bảng tin…</p>}
+      {loading && <p className="py-8 text-center text-[var(--mika-fg-subtle)]">Đang tải bảng tin…</p>}
 
       {!loading && posts.length === 0 && (
-        <p className="rounded-xl bg-[#242526] p-8 text-center text-zinc-400">Chưa có bài viết. Hãy là người đầu tiên!</p>
+        <p className="rounded-xl bg-[var(--mika-surface)] p-8 text-center text-[var(--mika-fg-muted)]">Chưa có bài viết. Hãy là người đầu tiên!</p>
       )}
 
       <div className="space-y-4">
         {posts.map((post) => (
           <article
             key={post.id}
-            className="overflow-hidden rounded-xl border border-white/10 bg-[#242526] shadow-lg"
+            className="overflow-hidden rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] shadow-lg"
           >
             <div className="flex items-start gap-3 p-4">
               <Link
                 href={`/profile/${encodeURIComponent(post.user.id)}`}
-                className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#3a3b3c]"
+                className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--mika-input)]"
               >
                 {post.user.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={post.user.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="text-xs font-bold text-zinc-300">U</div>
+                  <div className="text-xs font-bold text-[var(--mika-fg-muted)]">U</div>
                 )}
               </Link>
               <div className="min-w-0 flex-1">
                 <Link href={`/profile/${encodeURIComponent(post.user.id)}`} className="block">
-                  <p className="font-semibold text-zinc-200 truncate">{post.user.displayName}</p>
+                  <p className="font-semibold text-[var(--mika-fg)] truncate">{post.user.displayName}</p>
                 </Link>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-[var(--mika-fg-subtle)]">
                   {timeAgo(post.createdAt)} · Bài viết · News English
                 </p>
               </div>
             </div>
-            <p className="px-4 pb-3 text-[15px] leading-relaxed text-zinc-100">{post.content}</p>
+            <p className="px-4 pb-3 text-[15px] leading-relaxed text-[var(--mika-fg)]">{post.content}</p>
             {post.imageUrl ? (
               <div className="px-4 pb-3">
                 <img src={post.imageUrl} alt="post" className="max-h-96 w-full rounded-lg object-cover" />
@@ -430,13 +430,13 @@ export default function HomePage() {
                 </div>
               </div>
             ) : null}
-            <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-sm text-zinc-400">
+            <div className="flex items-center justify-between border-t border-[color:var(--mika-border)] px-4 py-2 text-sm text-[var(--mika-fg-muted)]">
               <span>{post.likes} lượt thích</span>
             </div>
-            <div className="flex items-center gap-1 border-t border-white/10 px-2 py-1">
+            <div className="flex items-center gap-1 border-t border-[color:var(--mika-border)] px-2 py-1">
               <button
                 type="button"
-                className="flex-1 rounded-lg py-2 text-sm font-medium text-zinc-300 hover:bg-white/5"
+                className="flex-1 rounded-lg py-2 text-sm font-medium text-[var(--mika-fg-muted)] hover:bg-white/5"
                 onClick={() =>
                   void (async () => {
                     await api.post("/api/v1/news/like", { postId: post.id });
@@ -445,17 +445,17 @@ export default function HomePage() {
                 }
               >
                 <span className="inline-flex items-center gap-2">
-                  <FaThumbsUp className="text-zinc-300" />
+                  <FaThumbsUp className="text-[var(--mika-fg-muted)]" />
                   Thích
                 </span>
               </button>
               <button
                 type="button"
-                className="flex-1 rounded-lg py-2 text-sm font-medium text-zinc-300 hover:bg-white/5"
+                className="flex-1 rounded-lg py-2 text-sm font-medium text-[var(--mika-fg-muted)] hover:bg-white/5"
                 onClick={() => void loadComments(post.id)}
               >
                 <span className="inline-flex items-center gap-2">
-                  <FaCommentDots className="text-zinc-300" />
+                  <FaCommentDots className="text-[var(--mika-fg-muted)]" />
                   Bình luận
                 </span>
               </button>
@@ -481,7 +481,7 @@ export default function HomePage() {
               {meUserId && post.user.id === meUserId ? (
                 <button
                   type="button"
-                  className="w-10 rounded-lg py-2 text-sm font-medium text-zinc-300 hover:bg-white/5"
+                  className="w-10 rounded-lg py-2 text-sm font-medium text-[var(--mika-fg-muted)] hover:bg-white/5"
                   onClick={() => void deletePost(post.id)}
                   aria-label="Xóa bài viết"
                 >
@@ -489,10 +489,10 @@ export default function HomePage() {
                 </button>
               ) : null}
             </div>
-            <div className="border-t border-white/10 bg-[#18191a] p-3">
+            <div className="border-t border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] p-3">
               <div className="flex gap-2">
                 <input
-                  className="flex-1 rounded-full border-0 bg-[#3a3b3c] px-4 py-2 text-sm text-white placeholder:text-zinc-500"
+                  className="flex-1 rounded-full border-0 bg-[var(--mika-input)] px-4 py-2 text-sm text-[var(--mika-fg)] placeholder:text-[var(--mika-fg-subtle)]"
                   placeholder="Viết bình luận…"
                   value={commentDraft[post.id] ?? ""}
                   onChange={(e) =>
@@ -501,7 +501,7 @@ export default function HomePage() {
                 />
                 <button
                   type="button"
-                  className="rounded-full bg-[#3a3b3c] px-4 py-2 text-sm text-[#E50914] hover:bg-[#4e4f50]"
+                  className="rounded-full bg-[var(--mika-input)] px-4 py-2 text-sm text-[#E50914] hover:bg-[var(--mika-input-hover)]"
                   onClick={() =>
                     void (async () => {
                       const draft = commentDraft[post.id];
@@ -519,7 +519,7 @@ export default function HomePage() {
                 {(postComments[post.id] ?? []).map((comment) => (
                   <div
                     key={comment.id}
-                    className="rounded-lg bg-[#3a3b3c]/50 px-3 py-2 text-sm text-zinc-200"
+                    className="rounded-lg bg-[var(--mika-input)]/50 px-3 py-2 text-sm text-[var(--mika-fg)]"
                   >
                     <div className="flex items-start gap-2">
                       <Link href={`/profile/${encodeURIComponent(comment.user.id)}`} className="mt-0.5 shrink-0">
@@ -531,17 +531,17 @@ export default function HomePage() {
                             className="h-7 w-7 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2f2f2f] text-[11px] font-bold text-zinc-300">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2f2f2f] text-[11px] font-bold text-[var(--mika-fg-muted)]">
                             {comment.user.displayName?.slice(0, 1).toUpperCase() ?? "U"}
                           </div>
                         )}
                       </Link>
                       <div className="min-w-0 flex-1">
                         <Link href={`/profile/${encodeURIComponent(comment.user.id)}`} className="block">
-                          <p className="text-xs text-zinc-300 truncate">{comment.user.displayName}</p>
+                          <p className="text-xs text-[var(--mika-fg-muted)] truncate">{comment.user.displayName}</p>
                         </Link>
-                        <p className="text-sm text-zinc-200 break-words">{comment.content}</p>
-                        <p className="mt-1 text-[11px] text-zinc-500">{timeAgo(comment.createdAt)}</p>
+                        <p className="text-sm text-[var(--mika-fg)] break-words">{comment.content}</p>
+                        <p className="mt-1 text-[11px] text-[var(--mika-fg-subtle)]">{timeAgo(comment.createdAt)}</p>
                       </div>
                     </div>
                   </div>
@@ -554,25 +554,25 @@ export default function HomePage() {
       </div>
 
       <aside className="hidden xl:block">
-        <div className="sticky top-20 rounded-xl border border-white/10 bg-[#242526] p-4">
-          <h3 className="mb-3 text-sm font-semibold text-white">Top rank (điểm)</h3>
+        <div className="sticky top-20 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
+          <h3 className="mb-3 text-sm font-semibold text-[var(--mika-fg)]">Top rank (điểm)</h3>
           <div className="space-y-2">
             {topRanks.map((u, i) => (
               <Link key={`${u.userId}-${i}`} href={`/profile/${encodeURIComponent(u.userId)}`} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
-                <span className="w-6 text-xs text-zinc-400">#{i + 1}</span>
-                <div className="h-8 w-8 overflow-hidden rounded-full bg-[#3a3b3c]">
+                <span className="w-6 text-xs text-[var(--mika-fg-muted)]">#{i + 1}</span>
+                <div className="h-8 w-8 overflow-hidden rounded-full bg-[var(--mika-input)]">
                   {u.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={u.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
                   ) : null}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-zinc-200">{u.displayName}</p>
+                  <p className="truncate text-sm text-[var(--mika-fg-muted)]">{u.displayName}</p>
                 </div>
                 <span className="text-xs text-[#E50914]">{u.points ?? 0}</span>
               </Link>
             ))}
-            {topRanks.length === 0 ? <p className="text-xs text-zinc-500">Chưa có dữ liệu.</p> : null}
+            {topRanks.length === 0 ? <p className="text-xs text-[var(--mika-fg-subtle)]">Chưa có dữ liệu.</p> : null}
           </div>
         </div>
       </aside>

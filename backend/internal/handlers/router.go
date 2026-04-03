@@ -347,6 +347,29 @@ func NewRouter() http.Handler {
 		})
 	}))
 
+	// POST JSON → file .xlsx — công khai, không cần JWT (tiện tích hợp / script).
+	mux.HandleFunc("/api/v1/vocabularies/excel", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+			return
+		}
+		r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+		var req services.ExcelGenerateRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "payload JSON không hợp lệ"})
+			return
+		}
+		buf, fname, err := services.BuildVocabularyExcel(req)
+		if err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			return
+		}
+		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		w.Header().Set("Content-Disposition", "attachment; filename="+strconv.Quote(fname))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(buf)
+	})
+
 	mux.HandleFunc("/api/v1/bookmarks", withJWT(cfg.JWTSecretKey, authService.IsAccessTokenBlocked, func(w http.ResponseWriter, r *http.Request) {
 		uid := getUserID(r.Context())
 		ctx := r.Context()

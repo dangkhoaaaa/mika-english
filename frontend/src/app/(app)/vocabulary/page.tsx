@@ -7,7 +7,7 @@ import type { AppDispatch, RootState } from "@/lib/store";
 import { api, setAuthToken } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
 import { mapVocabFromApi } from "@/lib/vocabFromApi";
-import { speakEnglish, speakVietnamese } from "@/lib/speech";
+import { speakExampleLine, speakMeaning, speakVocab } from "@/lib/speech";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useBookmarkIds } from "@/lib/useBookmarkIds";
 
@@ -130,15 +130,15 @@ export default function VocabularyPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-3 py-8 sm:px-4">
+    <div className="mx-auto max-w-[1300px] px-3 py-8 sm:px-4">
       <h1 className="mb-6 text-2xl font-bold">
         <span className="text-[#E50914]">Từ vựng</span> của bạn
       </h1>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-[#242526] p-4">
-        <span className="text-sm text-zinc-400">Lọc theo chủ đề:</span>
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
+        <span className="text-sm text-[var(--mika-fg-muted)]">Lọc theo chủ đề:</span>
         <select
-          className="rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+          className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
           value={filterTopic}
           onChange={(e) => setFilterTopic(e.target.value)}
         >
@@ -183,12 +183,12 @@ export default function VocabularyPage() {
         </button>
       </div>
 
-      {loading && <p className="text-zinc-500">Đang tải…</p>}
+      {loading && <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p>}
       <div className="space-y-2">
         {filteredItems.map((item) => (
           <article
             key={item.id}
-            className="flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-[#242526] p-4"
+            className="flex items-start justify-between gap-3 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4"
           >
             <div className="min-w-0 flex-1">
               {item.topic ? (
@@ -196,29 +196,29 @@ export default function VocabularyPage() {
                   {item.topic}
                 </p>
               ) : null}
-              <p className="font-semibold text-white">{item.vocabulary}</p>
-              <p className="text-sm text-zinc-400">{item.meaning}</p>
-              <p className="text-xs text-zinc-500">{item.example}</p>
+              <p className="font-semibold text-[var(--mika-fg)]">{item.vocabulary}</p>
+              <p className="text-sm text-[var(--mika-fg-muted)]">{item.meaning}</p>
+              <p className="text-xs text-[var(--mika-fg-subtle)]">{item.example}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="rounded bg-[#3a3b3c] px-2 py-1 text-xs text-zinc-200 hover:bg-[#4e4f50]"
-                  onClick={() => speakEnglish(item.vocabulary)}
+                  className="rounded bg-[var(--mika-input)] px-2 py-1 text-xs text-[var(--mika-fg)] hover:bg-[var(--mika-input-hover)]"
+                  onClick={() => speakVocab(item.vocabulary)}
                 >
                   🔊 Từ (EN)
                 </button>
                 <button
                   type="button"
-                  className="rounded bg-[#3a3b3c] px-2 py-1 text-xs text-zinc-200 hover:bg-[#4e4f50]"
-                  onClick={() => speakVietnamese(item.meaning)}
+                  className="rounded bg-[var(--mika-input)] px-2 py-1 text-xs text-[var(--mika-fg)] hover:bg-[var(--mika-input-hover)]"
+                  onClick={() => speakMeaning(item.meaning)}
                 >
                   🔊 Nghĩa (VI)
                 </button>
                 {item.example ? (
                   <button
                     type="button"
-                    className="rounded bg-[#3a3b3c] px-2 py-1 text-xs text-zinc-200 hover:bg-[#4e4f50]"
-                    onClick={() => speakEnglish(item.example)}
+                    className="rounded bg-[var(--mika-input)] px-2 py-1 text-xs text-[var(--mika-fg)] hover:bg-[var(--mika-input-hover)]"
+                    onClick={() => speakExampleLine(item.example)}
                   >
                     🔊 Ví dụ
                   </button>
@@ -228,7 +228,7 @@ export default function VocabularyPage() {
                   className={`rounded px-2 py-1 text-xs ${
                     bookmarkIds.has(item.id)
                       ? "bg-amber-900/80 text-amber-100 hover:bg-amber-800"
-                      : "bg-[#3a3b3c] text-zinc-200 hover:bg-[#4e4f50]"
+                      : "bg-[var(--mika-input)] text-[var(--mika-fg)] hover:bg-[var(--mika-input-hover)]"
                   }`}
                   onClick={() => void toggleBookmark(item.id)}
                 >
@@ -249,7 +249,7 @@ export default function VocabularyPage() {
         ))}
       </div>
       {!loading && filteredItems.length === 0 && (
-        <p className="rounded-xl bg-[#242526] p-8 text-center text-zinc-500">
+        <p className="rounded-xl bg-[var(--mika-surface)] p-8 text-center text-[var(--mika-fg-subtle)]">
           {items.length === 0
             ? "Chưa có từ vựng."
             : "Không có từ trong bộ lọc này."}

@@ -69,18 +69,6 @@ const rarityStyle = (t: string) => {
     case "Divine":
       return "from-white via-sky-100 to-purple-300 text-black border-white/80 shadow-[0_0_54px_rgba(255,255,255,0.8)]";
 
-    case "SSS":
-      return "from-amber-300 via-yellow-200 to-orange-400 text-black border-yellow-200 shadow-[0_0_28px_rgba(251,191,36,0.45)]";
-    case "SS":
-      return "from-violet-400 via-fuchsia-300 to-indigo-400 text-white border-fuchsia-200 shadow-[0_0_22px_rgba(217,70,239,0.4)]";
-    case "S":
-      return "from-sky-400 via-blue-300 to-cyan-300 text-black border-cyan-100 shadow-[0_0_18px_rgba(56,189,248,0.35)]";
-    case "A":
-      return "from-emerald-400 via-lime-300 to-green-300 text-black border-lime-100";
-    case "B":
-      return "from-indigo-500 via-blue-500 to-sky-500 text-white border-blue-200";
-    case "C":
-      return "from-green-700 via-emerald-700 to-teal-700 text-white border-emerald-200";
     default:
       return "from-zinc-500 via-zinc-400 to-slate-400 text-white border-zinc-200";
   }
@@ -120,18 +108,6 @@ const rarityTextStyle = (t: string) => {
       return "text-amber-50 drop-shadow-[0_0_24px_rgba(124,58,237,0.75)]";
     case "Divine":
       return "text-white drop-shadow-[0_0_26px_rgba(255,255,255,1)]";
-    case "SSS":
-      return "text-amber-50 drop-shadow-[0_0_12px_rgba(251,191,36,0.95)]";
-    case "SS":
-      return "text-fuchsia-50 drop-shadow-[0_0_12px_rgba(217,70,239,0.9)]";
-    case "S":
-      return "text-sky-900 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]";
-    case "A":
-      return "text-emerald-950 drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]";
-    case "B":
-      return "text-sky-50 drop-shadow-[0_0_12px_rgba(59,130,246,0.85)]";
-    case "C":
-      return "text-emerald-50 drop-shadow-[0_0_12px_rgba(16,185,129,0.75)]";
     default:
       return "text-zinc-50 drop-shadow-[0_0_10px_rgba(255,255,255,0.45)]";
   }
@@ -203,7 +179,7 @@ export default function FishCollectionPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-[1300px] px-3 py-16 text-center sm:px-4">
-        <p className="text-zinc-500">Đang tải…</p>
+        <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p>
       </div>
     );
   }
@@ -213,19 +189,19 @@ export default function FishCollectionPage() {
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Sưu tập cá</span>
       </h1>
-      <p className="mb-6 text-sm text-zinc-500">Mỗi cá tương ứng một thẻ trong topic bạn đã câu được.</p>
+      <p className="mb-6 text-sm text-[var(--mika-fg-subtle)]">Mỗi cá tương ứng một thẻ trong topic bạn đã câu được.</p>
 
       {summary ? (
-        <section className="mb-5 rounded-xl border border-white/10 bg-[#242526] p-4">
-          <div className="text-sm text-zinc-300">
-            Tổng số cá (unique từ): <strong className="text-white">{summary.totalUnique}</strong>
+        <section className="mb-5 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
+          <div className="text-sm text-[var(--mika-fg-muted)]">
+            Tổng số cá (unique từ): <strong className="text-[var(--mika-fg)]">{summary.totalUnique}</strong>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(summary.countsByType)
               .sort((a, b) => String(a[0]).localeCompare(String(b[0])))
               .map(([t, n]) => (
-                <span key={t} className="rounded-full border border-white/10 bg-[#18191a] px-3 py-1 text-xs text-zinc-200">
-                  {fishPretty(t)}: <strong className="text-white">{n}</strong>
+                <span key={t} className="rounded-full border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] px-3 py-1 text-xs text-[var(--mika-fg-muted)]">
+                  {fishPretty(t)}: <strong className="text-[var(--mika-fg)]">{n}</strong>
                 </span>
               ))}
           </div>
@@ -246,17 +222,17 @@ export default function FishCollectionPage() {
         </div>
       ) : null}
 
-      <section className="mb-4 rounded-xl border border-white/10 bg-[#242526] p-3">
+      <section className="mb-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-white">Lọc cá theo cấp</p>
-            <p className="text-xs text-zinc-500">D / C / B / A / A+ / S / S+ / SS / SS+ / SSS / SSS+ / SSR / EX / Mythic / Divine</p>
+            <p className="text-sm font-semibold text-[var(--mika-fg)]">Lọc cá theo cấp</p>
+            <p className="text-xs text-[var(--mika-fg-subtle)]">D / C / B / A / A+ / S / S+ / SS / SS+ / SSS / SSS+ / SSR / EX / Mythic / Divine</p>
           </div>
           <div className="flex items-center gap-2">
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+              className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
             >
               <option value="ALL">Tất cả</option>
               <option value="D">D</option>
@@ -278,7 +254,7 @@ export default function FishCollectionPage() {
             </select>
             <button
               type="button"
-              className="rounded-lg border border-white/20 bg-[#18191a] px-3 py-2 text-sm text-zinc-200 hover:bg-white/5"
+              className="rounded-lg border border-[color:var(--mika-border-strong)] bg-[var(--mika-surface-muted)] px-3 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5"
               onClick={() => setFilterType("ALL")}
               disabled={filterType === "ALL"}
             >
@@ -290,12 +266,12 @@ export default function FishCollectionPage() {
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.length === 0 ? (
-          <div className="col-span-full rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">
-            Chưa có cá nào. Vào <strong className="text-white">Câu cá</strong> để câu thử.
+          <div className="col-span-full rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-8 text-center text-[var(--mika-fg-subtle)]">
+            Chưa có cá nào. Vào <strong className="text-[var(--mika-fg)]">Câu cá</strong> để câu thử.
           </div>
         ) : items.filter((it) => filterType === "ALL" || it.bestFishType === filterType).length === 0 ? (
-          <div className="col-span-full rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">
-            Chưa có cá cấp <strong className="text-white">{filterType}</strong>.
+          <div className="col-span-full rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-8 text-center text-[var(--mika-fg-subtle)]">
+            Chưa có cá cấp <strong className="text-[var(--mika-fg)]">{filterType}</strong>.
           </div>
         ) : (
           items
@@ -312,14 +288,14 @@ export default function FishCollectionPage() {
               </div>
               <div className="relative min-w-[240px] flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="rounded bg-black/25 px-2 py-0.5 text-xs text-white/95">{it.topic}</span>
+                  <span className="rounded bg-black/25 px-2 py-0.5 text-xs text-[var(--mika-fg)]/95">{it.topic}</span>
                   <span className={`rounded-full border border-white/40 bg-black/25 px-2 py-0.5 text-xs font-semibold ${rarityTextStyle(it.bestFishType)}`}>
                     Rank {fishPretty(it.bestFishType)}
                   </span>
                 </div>
                 <button
                   type="button"
-                  className="absolute right-2 top-2 rounded-lg border border-white/20 bg-black/25 px-2 py-1 text-xs text-zinc-100 hover:bg-white/5"
+                  className="absolute right-2 top-2 rounded-lg border border-[color:var(--mika-border-strong)] bg-black/25 px-2 py-1 text-xs text-[var(--mika-fg)] hover:bg-white/5"
                   onClick={() => setActionsFor((v) => (v === it.vocabularyId ? null : it.vocabularyId))}
                   aria-label="Mở hành động"
                 >
@@ -334,12 +310,12 @@ export default function FishCollectionPage() {
 
                 {actionsFor === it.vocabularyId ? (
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/65 p-3">
-                    <div className="w-full rounded-xl border border-white/15 bg-[#18191a] p-3">
+                    <div className="w-full rounded-xl border border-[color:var(--mika-border-strong)] bg-[var(--mika-surface-muted)] p-3">
                       <div className="mb-2 flex items-center justify-between">
-                        <p className="text-sm font-semibold text-white">Hành động</p>
+                        <p className="text-sm font-semibold text-[var(--mika-fg)]">Hành động</p>
                         <button
                           type="button"
-                          className="rounded px-2 py-1 text-sm text-zinc-300 hover:bg-white/10"
+                          className="rounded px-2 py-1 text-sm text-[var(--mika-fg-muted)] hover:bg-white/10"
                           onClick={() => setActionsFor(null)}
                         >
                           ✕
@@ -380,7 +356,7 @@ export default function FishCollectionPage() {
 
                         <button
                           type="button"
-                          className="w-full rounded-lg border border-white/20 bg-black/25 px-3 py-2 text-xs font-semibold text-zinc-100 hover:bg-white/5"
+                          className="w-full rounded-lg border border-[color:var(--mika-border-strong)] bg-black/25 px-3 py-2 text-xs font-semibold text-[var(--mika-fg)] hover:bg-white/5"
                           onClick={() => {
                             setActionsFor(null);
                             setSellModal({

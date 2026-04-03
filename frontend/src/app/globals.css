@@ -5,6 +5,48 @@
   --foreground: #171717;
 }
 
+/* Theme Mika — dùng với html[data-theme="light"|"dark"] (ThemeProvider) */
+:root,
+html[data-theme="dark"] {
+  --mika-bg-page: #141414;
+  --mika-surface: #242526;
+  --mika-surface-muted: #18191a;
+  --mika-input: #3a3b3c;
+  --mika-input-hover: #4e4f50;
+  --mika-border: rgba(255, 255, 255, 0.1);
+  --mika-border-strong: rgba(255, 255, 255, 0.2);
+  --mika-border-faint: rgba(255, 255, 255, 0.05);
+  --mika-fg: #ffffff;
+  --mika-fg-muted: #a1a1aa;
+  --mika-fg-subtle: #71717a;
+  --mika-flip-front-from: #1a1a1a;
+  --mika-flip-front-to: #18191a;
+  --mika-flip-back-from: #252525;
+  --mika-flip-back-to: #1e1e1f;
+  --mika-flip-label-back: #34d399;
+  --mika-flip-text-back: #f4f4f5;
+}
+
+html[data-theme="light"] {
+  --mika-bg-page: #e4e4e7;
+  --mika-surface: #ffffff;
+  --mika-surface-muted: #f4f4f5;
+  --mika-input: #ffffff;
+  --mika-input-hover: #e4e4e7;
+  --mika-border: rgba(0, 0, 0, 0.1);
+  --mika-border-strong: rgba(0, 0, 0, 0.15);
+  --mika-border-faint: rgba(0, 0, 0, 0.06);
+  --mika-fg: #18181b;
+  --mika-fg-muted: #52525b;
+  --mika-fg-subtle: #71717a;
+  --mika-flip-front-from: #fafafa;
+  --mika-flip-front-to: #f4f4f5;
+  --mika-flip-back-from: #f4f4f5;
+  --mika-flip-back-to: #e4e4e7;
+  --mika-flip-label-back: #059669;
+  --mika-flip-text-back: #27272a;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,16 +54,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: #141414;
-  color: #f5f5f5;
+  background: var(--mika-bg-page);
+  color: var(--mika-fg);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 

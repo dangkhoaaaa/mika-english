@@ -23,7 +23,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#141414] text-zinc-400">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--mika-bg-page)] text-[var(--mika-fg-muted)]">
         Đang kiểm tra…
       </div>
     );

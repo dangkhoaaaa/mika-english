@@ -169,7 +169,7 @@ export default function QuizPage() {
   if (loadingVocab || loadingStats) {
     return (
       <div className="mx-auto max-w-[1300px] px-3 py-16 text-center sm:px-4">
-        <p className="text-zinc-500">Đang tải…</p>
+        <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p>
       </div>
     );
   }
@@ -179,20 +179,20 @@ export default function QuizPage() {
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Quiz topic</span>
       </h1>
-      <p className="mb-6 text-sm text-zinc-500">
+      <p className="mb-6 text-sm text-[var(--mika-fg-subtle)]">
         Mỗi câu đúng +5 điểm, sai -5 điểm. Hoàn thành quiz để nhận điểm và lên rank.
       </p>
 
-      <section className="mb-6 rounded-xl border border-white/10 bg-[#242526] p-5">
+      <section className="mb-6 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-5">
         <div className="flex flex-wrap items-center gap-3 justify-between">
-          <div className="text-sm text-zinc-300">
+          <div className="text-sm text-[var(--mika-fg-muted)]">
             {stats ? (
               <>
                 <div>
-                  Điểm: <strong className="text-white">{stats.points}</strong> · Rank:{" "}
-                  <strong className="text-white">{stats.rank}</strong>
+                  Điểm: <strong className="text-[var(--mika-fg)]">{stats.points}</strong> · Rank:{" "}
+                  <strong className="text-[var(--mika-fg)]">{stats.rank}</strong>
                 </div>
-                <div className="mt-1 text-xs text-zinc-500">
+                <div className="mt-1 text-xs text-[var(--mika-fg-subtle)]">
                   Streak: {stats.streakDays} ngày · Last check-in: {stats.lastCheckInDate || "—"}
                 </div>
               </>
@@ -201,7 +201,7 @@ export default function QuizPage() {
 
           <div className="flex flex-wrap gap-2 items-center">
             <select
-              className="rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+              className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
             >
@@ -212,7 +212,7 @@ export default function QuizPage() {
               ))}
             </select>
             <select
-              className="rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+              className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
               value={count}
               onChange={(e) => setCount(Number(e.target.value))}
             >
@@ -235,7 +235,7 @@ export default function QuizPage() {
       </section>
 
       {!attempt && !error ? (
-        <div className="rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">
+        <div className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-8 text-center text-[var(--mika-fg-subtle)]">
           Chọn topic và số câu để bắt đầu.
         </div>
       ) : null}
@@ -246,16 +246,16 @@ export default function QuizPage() {
       ) : null}
 
       {attempt && result ? (
-        <section className="rounded-xl border border-white/10 bg-[#242526] p-6">
-          <h2 className="text-lg font-semibold text-white">Kết quả</h2>
+        <section className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-6">
+          <h2 className="text-lg font-semibold text-[var(--mika-fg)]">Kết quả</h2>
           <p className="mt-2 text-2xl font-bold text-[#E50914]">{result.score} điểm</p>
-          <div className="mt-4 text-sm text-zinc-400">
+          <div className="mt-4 text-sm text-[var(--mika-fg-muted)]">
             Hoàn thành quiz xong sẽ được cộng điểm vào rank của bạn.
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
             <button
               type="button"
-              className="rounded-lg border border-white/20 px-4 py-2 text-sm text-zinc-200 hover:bg-white/5"
+              className="rounded-lg border border-[color:var(--mika-border-strong)] px-4 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5"
               onClick={() => {
                 setAttempt(null);
                 setResult(null);
@@ -272,16 +272,16 @@ export default function QuizPage() {
       ) : null}
 
       {attempt && !result ? (
-        <section className="rounded-xl border border-white/10 bg-[#242526] p-6">
+        <section className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-6">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="text-sm text-zinc-400">
-              Câu <strong className="text-white">{currentIndex + 1}</strong> / {attempt.total}
+            <div className="text-sm text-[var(--mika-fg-muted)]">
+              Câu <strong className="text-[var(--mika-fg)]">{currentIndex + 1}</strong> / {attempt.total}
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-[#18191a] p-5">
-            <div className="text-sm text-zinc-400">Câu hỏi (nghĩa tiếng Việt)</div>
-            <div className="mt-2 text-xl font-bold text-white">{attempt.questions[currentIndex]?.questionMeaning}</div>
+          <div className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] p-5">
+            <div className="text-sm text-[var(--mika-fg-muted)]">Câu hỏi (nghĩa tiếng Việt)</div>
+            <div className="mt-2 text-xl font-bold text-[var(--mika-fg)]">{attempt.questions[currentIndex]?.questionMeaning}</div>
           </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -292,7 +292,7 @@ export default function QuizPage() {
                   key={opt.vocabularyId}
                   type="button"
                   className={`rounded-lg px-4 py-3 text-sm text-left border ${
-                    selected ? "border-[#E50914] bg-[#E50914]/15" : "border-white/10 bg-[#18191a] hover:bg-white/5"
+                    selected ? "border-[#E50914] bg-[#E50914]/15" : "border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] hover:bg-white/5"
                   }`}
                   onClick={() => onSelect(currentIndex, opt.vocabularyId)}
                 >
@@ -302,11 +302,11 @@ export default function QuizPage() {
             })}
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4">
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-[color:var(--mika-border)] pt-4">
             <button
               type="button"
               disabled={step <= 0}
-              className="rounded-lg border border-white/20 px-4 py-2 text-sm text-zinc-200 hover:bg-white/5 disabled:opacity-50"
+              className="rounded-lg border border-[color:var(--mika-border-strong)] px-4 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5 disabled:opacity-50"
               onClick={() => {
                 setStep((s) => Math.max(0, s - 1));
               }}

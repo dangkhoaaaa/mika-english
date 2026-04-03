@@ -111,9 +111,9 @@ export default function FishingPage() {
 
   // Rank-up popup (dựa trên points)
   const rankMilestones = [
-    { name: "Đồng III", min: 0, color: "text-zinc-300" },
-    { name: "Đồng II", min: 66, color: "text-zinc-300" },
-    { name: "Đồng I", min: 132, color: "text-zinc-300" },
+    { name: "Đồng III", min: 0, color: "text-[var(--mika-fg-muted)]" },
+    { name: "Đồng II", min: 66, color: "text-[var(--mika-fg-muted)]" },
+    { name: "Đồng I", min: 132, color: "text-[var(--mika-fg-muted)]" },
     { name: "Bạc III", min: 200, color: "text-slate-200" },
     { name: "Bạc II", min: 300, color: "text-slate-200" },
     { name: "Bạc I", min: 400, color: "text-slate-200" },
@@ -412,7 +412,7 @@ export default function FishingPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-[1300px] px-3 py-16 text-center sm:px-4">
-        <p className="text-zinc-500">Đang tải…</p>
+        <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p>
       </div>
     );
   }
@@ -453,14 +453,14 @@ export default function FishingPage() {
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Câu cá</span> topic
       </h1>
-      <p className="mb-6 text-sm text-zinc-500">Timing-based mechanic theo độ hiếm cá. Cắn câu thành công rồi trả lời nghĩa trong 5 giây.</p>
+      <p className="mb-6 text-sm text-[var(--mika-fg-subtle)]">Timing-based mechanic theo độ hiếm cá. Cắn câu thành công rồi trả lời nghĩa trong 5 giây.</p>
 
-      <section className="mb-5 rounded-xl border border-white/10 bg-[#242526] p-4">
+      <section className="mb-5 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
         <div className="flex flex-wrap items-center gap-3 justify-between">
           <div className="flex-1 min-w-[220px]">
-            <label className="block text-sm text-zinc-400">Topic</label>
+            <label className="block text-sm text-[var(--mika-fg-muted)]">Topic</label>
             <select
-              className="mt-1 w-full rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+              className="mt-1 w-full rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
             >
@@ -475,15 +475,15 @@ export default function FishingPage() {
 
           <div className="flex items-end gap-2">
             {rodInfo ? (
-              <div className="hidden md:block rounded-lg border border-white/10 bg-[#18191a] px-3 py-2 text-xs text-zinc-300">
-                Cần: <strong className="text-white">{rodInfo.name}</strong>
-                <div className="mt-0.5 text-[11px] text-zinc-500">
-                  Giảm chờ: <strong className="text-zinc-200">{rodInfo.biteReducePct}%</strong> · Bảo hộ timing:{" "}
-                  <strong className="text-zinc-200">+{rodInfo.windowBonusPct}%</strong>
+              <div className="hidden md:block rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] px-3 py-2 text-xs text-[var(--mika-fg-muted)]">
+                Cần: <strong className="text-[var(--mika-fg)]">{rodInfo.name}</strong>
+                <div className="mt-0.5 text-[11px] text-[var(--mika-fg-subtle)]">
+                  Giảm chờ: <strong className="text-[var(--mika-fg)]">{rodInfo.biteReducePct}%</strong> · Bảo hộ timing:{" "}
+                  <strong className="text-[var(--mika-fg)]">+{rodInfo.windowBonusPct}%</strong>
                 </div>
               </div>
             ) : null}
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-[#18191a] px-3 py-2 text-xs text-zinc-300">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] px-3 py-2 text-xs text-[var(--mika-fg-muted)]">
               <input
                 type="checkbox"
                 checked={fxEnabled}
@@ -505,15 +505,15 @@ export default function FishingPage() {
 
       {/* Timing UI ở phía trên hồ cá */}
       {attempt && phase === "timing" ? (
-        <div className="mb-4 rounded-xl border border-white/10 bg-[#18191a] p-4">
+        <div className="mb-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] p-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="text-sm text-zinc-300">
-              Cá <strong className="text-white">{fishPretty(attempt.fishType)}</strong> · Timing window{" "}
-              <strong className="text-white">
+            <div className="text-sm text-[var(--mika-fg-muted)]">
+              Cá <strong className="text-[var(--mika-fg)]">{fishPretty(attempt.fishType)}</strong> · Timing window{" "}
+              <strong className="text-[var(--mika-fg)]">
                 {Math.max(0, attempt.timing.targetEndMs - attempt.timing.targetStartMs)}ms
               </strong>
             </div>
-            <div className="text-xs text-zinc-500">
+            <div className="text-xs text-[var(--mika-fg-subtle)]">
               Timing: {Math.round(attempt.timing.mechanicDurationMs / 100) / 10}s
             </div>
           </div>
@@ -535,8 +535,8 @@ export default function FishingPage() {
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-white/10 bg-[#242526] p-5">
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-[#061a2d] to-[#050f1c] p-4">
+      <section className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-5">
+        <div className="relative overflow-hidden rounded-xl border border-[color:var(--mika-border)] bg-gradient-to-b from-[#061a2d] to-[#050f1c] p-4">
           <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(#ffffff22_1px,transparent_1px)] [background-size:18px_18px]"></div>
 
           {/* Aquarium scene */}
@@ -591,7 +591,7 @@ export default function FishingPage() {
               ) : null}
 
               <div className="absolute inset-x-0 bottom-2 flex justify-center">
-                <div className="text-xs text-zinc-200/80">
+                <div className="text-xs text-white/80">
                   {phase === "waiting" ? "Cá đang cắn câu…" : null}
                   {phase === "waiting" ? (
                     <div className="mt-1 text-[#E50914]">
@@ -599,7 +599,7 @@ export default function FishingPage() {
                     </div>
                   ) : null}
                   {phase === "waiting" && preTimingMs > 0 ? (
-                    <div className="mt-1 text-zinc-200">
+                    <div className="mt-1 text-white/90">
                       Chuẩn bị timing… <span className="text-[#E50914]">{Math.ceil(preTimingMs / 1000)}s</span>
                     </div>
                   ) : null}
@@ -614,28 +614,28 @@ export default function FishingPage() {
               </div>
             </div>
           ) : (
-            <div className="flex h-[240px] items-center justify-center text-zinc-500">Thả mồi để bắt đầu.</div>
+            <div className="flex h-[240px] items-center justify-center text-[var(--mika-fg-subtle)]">Thả mồi để bắt đầu.</div>
           )}
         </div>
 
         {attempt && phase === "answer" ? (
-          <div className="mt-4 rounded-xl border border-white/10 bg-[#18191a] p-4">
+          <div className="mt-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="text-sm text-zinc-300">
+              <div className="text-sm text-[var(--mika-fg-muted)]">
                 Thẻ:{" "}
-                <span className="font-bold text-white">{attempt.cardVocabulary}</span>
+                <span className="font-bold text-[var(--mika-fg)]">{attempt.cardVocabulary}</span>
               </div>
-              <div className="text-xs text-zinc-500">
+              <div className="text-xs text-[var(--mika-fg-subtle)]">
                 Còn <span className="font-semibold text-[#E50914]">{Math.ceil(answerLeftMs / 1000)}s</span>
               </div>
             </div>
 
             <div className="mt-3">
-              <label className="block text-xs text-zinc-500">Nhập nghĩa tiếng Việt</label>
+              <label className="block text-xs text-[var(--mika-fg-subtle)]">Nhập nghĩa tiếng Việt</label>
               <input
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+                className="mt-1 w-full rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
                 placeholder="Ví dụ: mèo"
               />
             </div>
@@ -652,7 +652,7 @@ export default function FishingPage() {
               <button
                 type="button"
                 disabled={submitting}
-                className="flex-1 min-w-[160px] rounded-lg border border-white/20 px-4 py-2 text-sm text-zinc-200 hover:bg-white/5"
+                className="flex-1 min-w-[160px] rounded-lg border border-[color:var(--mika-border-strong)] px-4 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5"
                 onClick={() => void submitAnswer(true)}
               >
                 Hết giờ / nộp
@@ -662,10 +662,10 @@ export default function FishingPage() {
         ) : null}
 
         {attempt && phase === "result" && result ? (
-          <div className="mt-4 rounded-xl border border-white/10 bg-[#18191a] p-4">
-            <div className="text-sm text-zinc-300">
-              Cá: <strong className="text-white">{fishPretty(result.fishType)}</strong> · Timing:{" "}
-              <strong className="text-white">{result.timingOk ? "OK" : "Fail"}</strong>
+          <div className="mt-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] p-4">
+            <div className="text-sm text-[var(--mika-fg-muted)]">
+              Cá: <strong className="text-[var(--mika-fg)]">{fishPretty(result.fishType)}</strong> · Timing:{" "}
+              <strong className="text-[var(--mika-fg)]">{result.timingOk ? "OK" : "Fail"}</strong>
               {result.caught ? (
                 <>
                   {" "}
@@ -699,7 +699,7 @@ export default function FishingPage() {
               </button>
             <Link
               href="/fish-collection"
-              className="rounded-lg border border-white/20 bg-[#18191a] px-4 py-2 text-sm text-zinc-200 hover:bg-white/5"
+              className="rounded-lg border border-[color:var(--mika-border-strong)] bg-[var(--mika-surface-muted)] px-4 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5"
             >
               Xem sưu tập cá
             </Link>
@@ -716,10 +716,10 @@ export default function FishingPage() {
 
       {rankPopup ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="w-full max-w-sm rounded-2xl border border-white/20 bg-[#18191a] p-5 shadow-2xl">
-            <h2 className="mb-2 text-sm font-semibold text-zinc-300">Chúc mừng!</h2>
+          <div className="w-full max-w-sm rounded-2xl border border-[color:var(--mika-border-strong)] bg-[var(--mika-surface-muted)] p-5 shadow-2xl">
+            <h2 className="mb-2 text-sm font-semibold text-[var(--mika-fg-muted)]">Chúc mừng!</h2>
             <p className={`text-xl font-bold ${rankPopup.color}`}>Bạn đã lên {rankPopup.to}</p>
-            <p className="mt-2 text-xs text-zinc-400">
+            <p className="mt-2 text-xs text-[var(--mika-fg-muted)]">
               Từ {rankPopup.from} → {rankPopup.to}. Tiếp tục học để lên rank cao hơn nữa.
             </p>
             <button

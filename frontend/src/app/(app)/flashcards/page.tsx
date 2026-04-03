@@ -177,15 +177,15 @@ export default function FlashcardsPage() {
     <div className="mx-auto max-w-[1300px] px-3 py-6 sm:px-4">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-[var(--mika-fg)]">
             <span className="text-[#E50914]">Thêm từ & Import</span>
           </h1>
-          <p className="text-sm text-zinc-500">Nhập từng từ hoặc import Excel (mỗi sheet = một chủ đề).</p>
+          <p className="text-sm text-[var(--mika-fg-subtle)]">Nhập từng từ hoặc import Excel (mỗi sheet = một chủ đề).</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/excel"
-            className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/5"
+            className="rounded-lg border border-[color:var(--mika-border-strong)] px-4 py-2 text-sm font-semibold text-[var(--mika-fg)] hover:bg-white/5"
           >
             Xem mẫu excel / Kho excel
           </Link>
@@ -198,47 +198,47 @@ export default function FlashcardsPage() {
         </div>
       </div>
 
-      <section className="mb-6 rounded-xl border border-white/10 bg-[#242526] p-4">
+      <section className="mb-6 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
         {/* <button
           type="button"
-          className="mb-4 rounded-lg bg-[#3a3b3c] px-4 py-2 text-sm hover:bg-[#4e4f50]"
+          className="mb-4 rounded-lg bg-[var(--mika-input)] px-4 py-2 text-sm hover:bg-[var(--mika-input-hover)]"
           onClick={() => void load()}
         >
           Tải từ API
         </button>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-7">
           <input
-            className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm"
             placeholder="Chủ đề (topic)"
             value={form.topic}
             onChange={(e) => setForm({ ...form, topic: e.target.value })}
           />
           <input
-            className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm"
             placeholder="Vocabulary"
             value={form.vocabulary}
             onChange={(e) => setForm({ ...form, vocabulary: e.target.value })}
           />
           <input
-            className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm"
             placeholder="POS"
             value={form.pos}
             onChange={(e) => setForm({ ...form, pos: e.target.value })}
           />
           <input
-            className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm"
             placeholder="Class"
             value={form.classCode}
             onChange={(e) => setForm({ ...form, classCode: e.target.value })}
           />
           <input
-            className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm"
             placeholder="Meaning"
             value={form.meaning}
             onChange={(e) => setForm({ ...form, meaning: e.target.value })}
           />
           <input
-            className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm"
             placeholder="Example"
             value={form.example}
             onChange={(e) => setForm({ ...form, example: e.target.value })}
@@ -252,7 +252,7 @@ export default function FlashcardsPage() {
           </button>
         </div> */}
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="cursor-pointer rounded-lg border border-dashed border-white/20 bg-[#18191a] px-4 py-2 text-sm text-zinc-300 hover:bg-[#252525]">
+          <label className="cursor-pointer rounded-lg border border-dashed border-[color:var(--mika-border-strong)] bg-[var(--mika-surface-muted)] px-4 py-2 text-sm text-[var(--mika-fg-muted)] hover:bg-[var(--mika-input-hover)]">
             {syncing ? "Đang đồng bộ…" : "Import Excel (nhiều sheet)"}
             <input
               type="file"
@@ -264,11 +264,11 @@ export default function FlashcardsPage() {
           </label>
         </div>
 
-        <div className="mt-3 rounded-lg border border-white/10 bg-[#18191a] p-3">
-          <p className="mb-2 text-xs text-zinc-400">Import trực tiếp từ Google Sheets link</p>
+        <div className="mt-3 rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)] p-3">
+          <p className="mb-2 text-xs text-[var(--mika-fg-muted)]">Import trực tiếp từ Google Sheets link</p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
-              className="flex-1 rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm"
+              className="flex-1 rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm"
               placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=..."
               value={googleSheetUrl}
               onChange={(e) => setGoogleSheetUrl(e.target.value)}
@@ -284,7 +284,7 @@ export default function FlashcardsPage() {
           </div>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
             <input
-              className="rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm"
+              className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm"
               placeholder="Tiêu đề khi share lên Kho excel (vd: TOEIC part 5 set A)"
               value={shareTitle}
               onChange={(e) => setShareTitle(e.target.value)}
@@ -292,7 +292,7 @@ export default function FlashcardsPage() {
             <button
               type="button"
               disabled={sharingLink || !googleSheetUrl.trim()}
-              className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/5 disabled:opacity-50"
+              className="rounded-lg border border-[color:var(--mika-border-strong)] px-4 py-2 text-sm font-semibold text-[var(--mika-fg)] hover:bg-white/5 disabled:opacity-50"
               onClick={async () => {
                 const token = getAccessToken();
                 if (!token) return;
@@ -315,7 +315,7 @@ export default function FlashcardsPage() {
               {sharingLink ? "Đang share..." : "Share lên Kho excel"}
             </button>
           </div>
-          <p className="mt-2 text-[11px] text-zinc-500">Lưu ý: file Google Sheets cần quyền Anyone with the link can view.</p>
+          <p className="mt-2 text-[11px] text-[var(--mika-fg-subtle)]">Lưu ý: file Google Sheets cần quyền Anyone with the link can view.</p>
         </div>
         {importMsg && (
           <p className="mt-2 text-sm text-amber-200/90">{importMsg}</p>

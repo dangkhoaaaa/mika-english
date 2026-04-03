@@ -33,14 +33,14 @@ export function ConfirmModal({
         aria-label="Đóng"
         onClick={loading ? undefined : onCancel}
       />
-      <div className="relative z-10 w-full max-w-md rounded-xl border border-white/10 bg-[#242526] p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
-        <p className="mt-3 whitespace-pre-wrap text-sm text-zinc-400">{message}</p>
+      <div className="relative z-10 w-full max-w-md rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-[var(--mika-fg)]">{title}</h2>
+        <p className="mt-3 whitespace-pre-wrap text-sm text-[var(--mika-fg-muted)]">{message}</p>
         <div className="mt-6 flex flex-wrap justify-end gap-2">
           <button
             type="button"
             disabled={loading}
-            className="rounded-lg border border-white/20 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-50"
+            className="rounded-lg border border-[color:var(--mika-border-strong)] px-4 py-2 text-sm text-[var(--mika-fg-muted)] hover:bg-[var(--mika-input-hover)] disabled:opacity-50"
             onClick={onCancel}
           >
             {cancelLabel}

@@ -81,7 +81,7 @@ export default function CheckInPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-[1300px] px-3 py-16 text-center sm:px-4">
-        <p className="text-zinc-500">Đang tải…</p>
+        <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p>
       </div>
     );
   }
@@ -91,21 +91,21 @@ export default function CheckInPage() {
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Điểm danh</span>
       </h1>
-      <p className="mb-6 text-sm text-zinc-500">
+      <p className="mb-6 text-sm text-[var(--mika-fg-subtle)]">
         Mỗi ngày check-in 1 lần. Streak càng dài thì điểm nhận càng tăng (có trần).
       </p>
 
-      <section className="mb-6 rounded-xl border border-white/10 bg-[#242526] p-5">
-        <div className="text-sm text-zinc-300">
+      <section className="mb-6 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-5">
+        <div className="text-sm text-[var(--mika-fg-muted)]">
           {stats ? (
             <>
               <div>
-                Điểm: <strong className="text-white">{stats.points}</strong> · Rank:{" "}
-                <strong className="text-white">{stats.rank}</strong>
+                Điểm: <strong className="text-[var(--mika-fg)]">{stats.points}</strong> · Rank:{" "}
+                <strong className="text-[var(--mika-fg)]">{stats.rank}</strong>
               </div>
-              <div className="mt-1 text-xs text-zinc-500">
-                Streak hiện tại: <strong className="text-zinc-200">{stats.streakDays}</strong> ngày · Last check-in:{" "}
-                <strong className="text-zinc-200">{stats.lastCheckInDate || "—"}</strong>
+              <div className="mt-1 text-xs text-[var(--mika-fg-subtle)]">
+                Streak hiện tại: <strong className="text-[var(--mika-fg)]">{stats.streakDays}</strong> ngày · Last check-in:{" "}
+                <strong className="text-[var(--mika-fg)]">{stats.lastCheckInDate || "—"}</strong>
               </div>
               {lastGain ? (
                 <div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-950/30 px-3 py-2 text-emerald-100 text-xs">
@@ -123,7 +123,7 @@ export default function CheckInPage() {
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-white/10 bg-[#242526] p-6">
+      <section className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-6">
         <button
           type="button"
           disabled={isCheckedInToday || loadingCheckIn}
@@ -137,7 +137,7 @@ export default function CheckInPage() {
               : "Điểm danh hôm nay (+điểm)"}
         </button>
 
-        <div className="mt-4 text-xs text-zinc-500">
+        <div className="mt-4 text-xs text-[var(--mika-fg-subtle)]">
           Điểm công thức (mặc định): base 10 + (streak-1)*2, tối đa +20.
         </div>
       </section>

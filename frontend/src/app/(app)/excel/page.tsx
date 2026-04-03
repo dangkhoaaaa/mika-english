@@ -112,7 +112,7 @@ export default function ExcelPage() {
           <h1 className="mb-2 text-2xl font-bold">
             <span className="text-[#E50914]">Kho excel</span>
           </h1>
-          <p className="text-zinc-400">
+          <p className="text-[var(--mika-fg-muted)]">
             Danh sách excel do cộng đồng chia sẻ. Bạn có thể tải về hoặc đồng bộ thẳng vào thư viện từ vựng.
           </p>
         </div>
@@ -121,18 +121,18 @@ export default function ExcelPage() {
         </Link>
       </div>
 
-      <section className="mb-4 rounded-xl border border-white/10 bg-[#242526] p-4">
+      <section className="mb-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-sm font-semibold text-white">Mẫu excel chuẩn</p>
-            <p className="text-xs text-zinc-500">Bạn có thể tải mẫu này về để bắt đầu nhanh.</p>
+            <p className="text-sm font-semibold text-[var(--mika-fg)]">Mẫu excel chuẩn</p>
+            <p className="text-xs text-[var(--mika-fg-subtle)]">Bạn có thể tải mẫu này về để bắt đầu nhanh.</p>
           </div>
           <div className="flex gap-2">
             <a
               href={sampleGoogleSheetUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border border-white/20 px-3 py-2 text-sm text-zinc-200 hover:bg-white/5"
+              className="rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5"
             >
               Mở mẫu
             </a>
@@ -151,25 +151,25 @@ export default function ExcelPage() {
       </section>
 
       {msg ? (
-        <div className="mb-4 rounded-xl border border-white/10 bg-[#242526] p-3 text-sm text-zinc-200">
+        <div className="mb-4 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-3 text-sm text-[var(--mika-fg)]">
           {msg}
         </div>
       ) : null}
 
       <section className="space-y-3">
         {loading ? (
-          <div className="rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">Đang tải kho excel…</div>
+          <div className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-8 text-center text-[var(--mika-fg-subtle)]">Đang tải kho excel…</div>
         ) : items.length === 0 ? (
-          <div className="rounded-xl border border-white/10 bg-[#242526] p-8 text-center text-zinc-500">Chưa có excel nào được share.</div>
+          <div className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-8 text-center text-[var(--mika-fg-subtle)]">Chưa có excel nào được share.</div>
         ) : (
           items.map((it) => (
-            <article key={it.id} className="rounded-xl border border-white/10 bg-[#242526] p-4">
+            <article key={it.id} className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="truncate text-base font-semibold text-white">{it.title}</p>
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className="truncate text-base font-semibold text-[var(--mika-fg)]">{it.title}</p>
+                  <p className="mt-1 text-xs text-[var(--mika-fg-subtle)]">
                     Share bởi{" "}
-                    <Link href={`/profile/${encodeURIComponent(it.user?.id || "")}`} className="text-zinc-300 underline">
+                    <Link href={`/profile/${encodeURIComponent(it.user?.id || "")}`} className="text-[var(--mika-fg-muted)] underline">
                       {it.user?.displayName || "User"}
                     </Link>{" "}
                     · {new Date(it.createdAt).toLocaleString("vi-VN")}
@@ -180,7 +180,7 @@ export default function ExcelPage() {
                     href={it.sheetUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-lg border border-white/20 px-3 py-2 text-sm text-zinc-200 hover:bg-white/5"
+                    className="rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5"
                   >
                     Mở mẫu
                   </a>
@@ -188,7 +188,7 @@ export default function ExcelPage() {
                     href={sheetUrlToExportXlsx(it.sheetUrl) ?? it.sheetUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-lg border border-white/20 px-3 py-2 text-sm text-zinc-200 hover:bg-white/5"
+                    className="rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5"
                   >
                     Download
                   </a>
@@ -211,18 +211,18 @@ export default function ExcelPage() {
         <button
           type="button"
           disabled={page <= 1 || loading}
-          className="rounded-lg border border-white/20 px-3 py-2 text-sm text-zinc-200 hover:bg-white/5 disabled:opacity-50"
+          className="rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5 disabled:opacity-50"
           onClick={() => void load(page - 1)}
         >
           ← Trang trước
         </button>
-        <span className="text-sm text-zinc-400">
+        <span className="text-sm text-[var(--mika-fg-muted)]">
           Trang {page} / {totalPages}
         </span>
         <button
           type="button"
           disabled={page >= totalPages || loading}
-          className="rounded-lg border border-white/20 px-3 py-2 text-sm text-zinc-200 hover:bg-white/5 disabled:opacity-50"
+          className="rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-2 text-sm text-[var(--mika-fg)] hover:bg-white/5 disabled:opacity-50"
           onClick={() => void load(page + 1)}
         >
           Trang sau →

@@ -17,9 +17,9 @@ type Row = {
 };
 
 const rankMilestones = [
-  { name: "Đồng III", min: 0, color: "text-zinc-300" },
-  { name: "Đồng II", min: 66, color: "text-zinc-300" },
-  { name: "Đồng I", min: 132, color: "text-zinc-300" },
+  { name: "Đồng III", min: 0, color: "text-[var(--mika-fg-muted)]" },
+  { name: "Đồng II", min: 66, color: "text-[var(--mika-fg-muted)]" },
+  { name: "Đồng I", min: 132, color: "text-[var(--mika-fg-muted)]" },
   { name: "Bạc III", min: 200, color: "text-slate-200" },
   { name: "Bạc II", min: 300, color: "text-slate-200" },
   { name: "Bạc I", min: 400, color: "text-slate-200" },
@@ -97,27 +97,27 @@ export default function LeaderboardPage() {
       <h1 className="mb-2 text-2xl font-bold">
         <span className="text-[#E50914]">Top bảng xếp hạng</span>
       </h1>
-      <p className="mb-6 text-sm text-zinc-500">Top 50 người điểm cao nhất và top 50 người câu được nhiều cá nhất.</p>
+      <p className="mb-6 text-sm text-[var(--mika-fg-subtle)]">Top 50 người điểm cao nhất và top 50 người câu được nhiều cá nhất.</p>
 
       <div className="mb-4 flex gap-2">
         <button
           type="button"
           onClick={() => setTab("points")}
-          className={`rounded-lg px-4 py-2 text-sm ${tab === "points" ? "bg-[#E50914] text-white" : "bg-[#2b2b2b] text-zinc-300"}`}
+          className={`rounded-lg px-4 py-2 text-sm ${tab === "points" ? "bg-[#E50914] text-white" : "bg-[var(--mika-surface-muted)] text-[var(--mika-fg-muted)]"}`}
         >
           🏆 Top điểm
         </button>
         <button
           type="button"
           onClick={() => setTab("fish")}
-          className={`rounded-lg px-4 py-2 text-sm ${tab === "fish" ? "bg-[#E50914] text-white" : "bg-[#2b2b2b] text-zinc-300"}`}
+          className={`rounded-lg px-4 py-2 text-sm ${tab === "fish" ? "bg-[#E50914] text-white" : "bg-[var(--mika-surface-muted)] text-[var(--mika-fg-muted)]"}`}
         >
           🎣 Top cá
         </button>
         <button
           type="button"
           onClick={() => setTab("coins")}
-          className={`rounded-lg px-4 py-2 text-sm ${tab === "coins" ? "bg-[#E50914] text-white" : "bg-[#2b2b2b] text-zinc-300"}`}
+          className={`rounded-lg px-4 py-2 text-sm ${tab === "coins" ? "bg-[#E50914] text-white" : "bg-[var(--mika-surface-muted)] text-[var(--mika-fg-muted)]"}`}
         >
           💰 Top vàng
         </button>
@@ -126,59 +126,59 @@ export default function LeaderboardPage() {
         <input
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
-          className="min-w-[220px] flex-1 rounded-lg border border-white/10 bg-[#2b2b2b] px-3 py-2 text-sm"
+          className="min-w-[220px] flex-1 rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)] placeholder:text-[var(--mika-fg-subtle)]"
           placeholder="Lọc theo tên..."
         />
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as "score" | "name")}
-          className="rounded-lg border border-white/10 bg-[#2b2b2b] px-3 py-2 text-sm text-zinc-200"
+          className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
         >
           <option value="score">Sắp xếp theo điểm/cá</option>
           <option value="name">Sắp xếp theo tên</option>
         </select>
       </div>
 
-      {loading ? <p className="text-zinc-500">Đang tải…</p> : null}
+      {loading ? <p className="text-[var(--mika-fg-subtle)]">Đang tải…</p> : null}
       {error ? <p className="rounded-lg bg-red-950/40 p-3 text-sm text-red-200">{error}</p> : null}
 
       {!loading && !error ? (
-        <section className="overflow-hidden rounded-xl border border-white/10 bg-[#202124]">
+        <section className="overflow-hidden rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)]">
           {rows.length === 0 ? (
-            <div className="p-8 text-center text-zinc-500">Chưa có dữ liệu.</div>
+            <div className="p-8 text-center text-[var(--mika-fg-subtle)]">Chưa có dữ liệu.</div>
           ) : (
             rows.map((r, idx) => (
               <article
                 key={`${tab}-${r.userId}-${idx}`}
-                className="flex items-center justify-between border-b border-white/10 px-4 py-3 last:border-b-0"
+                className="flex items-center justify-between border-b border-[color:var(--mika-border)] px-4 py-3 last:border-b-0"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className={`w-8 text-center font-bold ${idx < 3 ? "text-amber-300" : "text-zinc-400"}`}>#{idx + 1}</div>
+                  <div className={`w-8 text-center font-bold ${idx < 3 ? "text-amber-300" : "text-[var(--mika-fg-muted)]"}`}>#{idx + 1}</div>
                   <Link
                     href={`/profile/${encodeURIComponent(r.userId)}`}
                     className="flex min-w-0 items-center gap-3"
                   >
-                    <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#18191a]">
+                    <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[color:var(--mika-border)] bg-[var(--mika-surface-muted)]">
                       {r.avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={r.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs font-bold text-zinc-300">
+                        <div className="flex h-full w-full items-center justify-center text-xs font-bold text-[var(--mika-fg-muted)]">
                           {r.displayName?.slice(0, 1)?.toUpperCase() ?? "U"}
                         </div>
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-white">{r.displayName || `user_${r.userId.slice(0, 6)}`}</p>
+                      <p className="truncate font-medium text-[var(--mika-fg)]">{r.displayName || `user_${r.userId.slice(0, 6)}`}</p>
                       {tab === "points" ? (
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-xs text-[var(--mika-fg-subtle)]">
                           Rank:{" "}
                           <span className={rankFromPoints(r.points).color}>{rankFromPoints(r.points).name}</span>
                         </p>
                       ) : tab === "coins" ? (
-                        <p className="text-xs text-zinc-500">Tích luỹ coins</p>
+                        <p className="text-xs text-[var(--mika-fg-subtle)]">Tích luỹ coins</p>
                       ) : (
-                        <p className="text-xs text-zinc-500">Cá unique: {r.totalUnique ?? 0}</p>
+                        <p className="text-xs text-[var(--mika-fg-subtle)]">Cá unique: {r.totalUnique ?? 0}</p>
                       )}
                     </div>
                   </Link>

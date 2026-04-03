@@ -42,7 +42,7 @@ export function FlipCard({ showFront, front, back, onFlip, disabled }: Props) {
         >
           {/* Mặt trước */}
           <div
-            className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1a1a1a] to-[#18191a] p-6 shadow-lg"
+            className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-2xl border border-[color:var(--mika-border)] bg-gradient-to-br from-[var(--mika-flip-front-from)] to-[var(--mika-flip-front-to)] p-6 shadow-lg"
             style={{
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
@@ -52,23 +52,23 @@ export function FlipCard({ showFront, front, back, onFlip, disabled }: Props) {
             <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[#E50914]">
               Mặt trước
             </p>
-            <div className="text-xl font-semibold leading-snug sm:text-2xl">{front}</div>
-            <p className="mt-6 text-center text-xs text-zinc-500">Nhấn để lật thẻ</p>
+            <div className="text-xl font-semibold leading-snug text-[var(--mika-fg)] sm:text-2xl">{front}</div>
+            <p className="mt-6 text-center text-xs text-[var(--mika-fg-subtle)]">Nhấn để lật thẻ</p>
           </div>
           {/* Mặt sau */}
           <div
-            className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#252525] to-[#1e1e1f] p-6 shadow-lg"
+            className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-2xl border border-[color:var(--mika-border)] bg-gradient-to-br from-[var(--mika-flip-back-from)] to-[var(--mika-flip-back-to)] p-6 shadow-lg"
             style={{
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
             }}
           >
-            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-emerald-400">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--mika-flip-label-back)]">
               Mặt sau
             </p>
-            <div className="text-lg leading-relaxed text-zinc-100 sm:text-xl">{back}</div>
-            <p className="mt-6 text-center text-xs text-zinc-500">Nhấn để lật lại</p>
+            <div className="text-lg leading-relaxed text-[var(--mika-flip-text-back)] sm:text-xl">{back}</div>
+            <p className="mt-6 text-center text-xs text-[var(--mika-fg-subtle)]">Nhấn để lật lại</p>
           </div>
         </div>
       </div>

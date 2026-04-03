@@ -15,7 +15,7 @@ import type { AppDispatch, RootState } from "@/lib/store";
 import { getAccessToken } from "@/lib/session";
 import { mapVocabFromApi } from "@/lib/vocabFromApi";
 import { FlipCard } from "@/components/flashcard/FlipCard";
-import { speakEnglish, speakVietnamese } from "@/lib/speech";
+import { speakExampleLine, speakMeaning, speakVocab } from "@/lib/speech";
 import Link from "next/link";
 import { api, setAuthToken } from "@/lib/api";
 import { useBookmarkIds } from "@/lib/useBookmarkIds";
@@ -75,26 +75,32 @@ export default function StudyPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-3xl px-3 py-6 sm:px-4">
+    <div className="mx-auto max-w-[1300px] px-3 py-6 sm:px-4">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-[var(--mika-fg)]">
             <span className="text-[#E50914]">Học thẻ</span>
           </h1>
-          <p className="text-sm text-zinc-500">Lật thẻ và bấm loa để nghe phát âm (trình duyệt).</p>
+          <p className="text-sm text-[var(--mika-fg-subtle)]">
+            Lật thẻ và bấm loa để nghe phát âm (trình duyệt). Chọn ngôn ngữ phát âm trong{" "}
+            <Link href="/settings" className="text-[#E50914] underline">
+              Cài đặt
+            </Link>
+            .
+          </p>
         </div>
         <Link
           href="/flashcards"
-          className="rounded-lg border border-white/20 px-3 py-1.5 text-sm text-zinc-300 hover:bg-white/5"
+          className="rounded-lg border border-[color:var(--mika-border-strong)] px-3 py-1.5 text-sm text-[var(--mika-fg-muted)] hover:bg-white/5"
         >
           ← Thêm / Import từ
         </Link>
       </div>
 
-      <section className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-[#242526] p-4">
-        <span className="text-sm text-zinc-400">Chủ đề:</span>
+      <section className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
+        <span className="text-sm text-[var(--mika-fg-muted)]">Chủ đề:</span>
         <select
-          className="rounded-lg border border-white/10 bg-[#3a3b3c] px-3 py-2 text-sm text-white"
+          className="rounded-lg border border-[color:var(--mika-border)] bg-[var(--mika-input)] px-3 py-2 text-sm text-[var(--mika-fg)]"
           value={selectedTopic}
           onChange={(e) => dispatch(setTopicFilter(e.target.value))}
         >
@@ -107,9 +113,9 @@ export default function StudyPage() {
         </select>
       </section>
 
-      <section className="rounded-xl border border-white/10 bg-[#242526] p-4">
+      <section className="rounded-xl border border-[color:var(--mika-border)] bg-[var(--mika-surface)] p-4">
         {!currentCard ? (
-          <div className="flex min-h-[260px] items-center justify-center rounded-2xl border border-white/5 bg-[#18191a] p-8 text-center text-zinc-500">
+          <div className="flex min-h-[260px] items-center justify-center rounded-2xl border border-[color:var(--mika-border-faint)] bg-[var(--mika-surface-muted)] p-8 text-center text-[var(--mika-fg-subtle)]">
             {items.length === 0 ? (
               <>
                 Chưa có từ.{" "}
@@ -129,13 +135,13 @@ export default function StudyPage() {
               front={<>{currentCard.vocabulary}</>}
               back={
                 <>
-                  <p className="mb-2 text-zinc-300">{currentCard.meaning}</p>
+                  <p className="mb-2 text-[var(--mika-fg-muted)]">{currentCard.meaning}</p>
                   {currentCard.example ? (
-                    <p className="mt-2 border-t border-white/10 pt-3 text-sm italic text-zinc-400">
+                    <p className="mt-2 border-t border-[color:var(--mika-border)] pt-3 text-sm italic text-[var(--mika-fg-muted)]">
                       {currentCard.example}
                     </p>
                   ) : null}
-                  <p className="mt-3 text-xs text-zinc-500">
+                  <p className="mt-3 text-xs text-[var(--mika-fg-subtle)]">
                     Chủ đề: {currentCard.topic || "—"} · POS: {currentCard.pos}
                     {currentCard.classCode ? ` · ${currentCard.classCode}` : ""}
                   </p>
@@ -143,36 +149,38 @@ export default function StudyPage() {
               }
             />
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm hover:bg-[#4e4f50]"
-                onClick={() => speakEnglish(currentCard.vocabulary)}
-              >
-                🔊 Từ (EN)
-              </button>
-              <button
-                type="button"
-                className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm hover:bg-[#4e4f50]"
-                onClick={() => speakVietnamese(currentCard.meaning)}
-              >
-                🔊 Nghĩa (VI)
-              </button>
-              {currentCard.example ? (
+            <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex min-w-0 flex-1 flex-wrap gap-2">
                 <button
                   type="button"
-                  className="rounded-lg bg-[#3a3b3c] px-3 py-2 text-sm hover:bg-[#4e4f50]"
-                  onClick={() => speakEnglish(currentCard.example)}
+                  className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm hover:bg-[var(--mika-input-hover)]"
+                  onClick={() => speakVocab(currentCard.vocabulary)}
                 >
-                  🔊 Ví dụ (EN)
+                  🔊 Từ (EN)
                 </button>
-              ) : null}
+                <button
+                  type="button"
+                  className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm hover:bg-[var(--mika-input-hover)]"
+                  onClick={() => speakMeaning(currentCard.meaning)}
+                >
+                  🔊 Nghĩa (VI)
+                </button>
+                {currentCard.example ? (
+                  <button
+                    type="button"
+                    className="rounded-lg bg-[var(--mika-input)] px-3 py-2 text-sm hover:bg-[var(--mika-input-hover)]"
+                    onClick={() => speakExampleLine(currentCard.example)}
+                  >
+                    🔊 Ví dụ (EN)
+                  </button>
+                ) : null}
+              </div>
               <button
                 type="button"
-                className={`rounded-lg px-3 py-2 text-sm ${
+                className={`shrink-0 rounded-lg px-3 py-2 text-sm ${
                   bookmarkIds.has(currentCard.id)
                     ? "bg-amber-900/80 text-amber-100 hover:bg-amber-800"
-                    : "bg-[#3a3b3c] hover:bg-[#4e4f50]"
+                    : "bg-[var(--mika-input)] hover:bg-[var(--mika-input-hover)]"
                 }`}
                 onClick={() => void toggleBookmark(currentCard.id)}
               >
@@ -182,24 +190,24 @@ export default function StudyPage() {
           </>
         )}
 
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-4">
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-[color:var(--mika-border)] pt-4">
           <button
             type="button"
-            className="rounded-lg bg-[#3a3b3c] px-4 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-4 py-2 text-sm"
             onClick={() => dispatch(prevCard())}
           >
             ← Trước
           </button>
           <button
             type="button"
-            className="rounded-lg bg-[#3a3b3c] px-4 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-4 py-2 text-sm"
             onClick={() => dispatch(nextCard())}
           >
             Sau →
           </button>
           <button
             type="button"
-            className="rounded-lg bg-[#3a3b3c] px-4 py-2 text-sm"
+            className="rounded-lg bg-[var(--mika-input)] px-4 py-2 text-sm"
             onClick={() => dispatch(shuffleCards())}
           >
             Xáo trộn
