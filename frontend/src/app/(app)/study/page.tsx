@@ -132,6 +132,8 @@ export default function StudyPage() {
             <FlipCard
               showFront={showFront}
               onFlip={() => dispatch(flipCard())}
+              onSwipeNext={() => dispatch(nextCard())}
+              onSwipePrev={() => dispatch(prevCard())}
               front={<>{currentCard.vocabulary}</>}
               back={
                 <>
