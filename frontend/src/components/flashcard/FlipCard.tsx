@@ -34,6 +34,9 @@ export function FlipCard({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (disabled) return;
+    // Lần chạm mới: bỏ chặn click. Sau vuốt, nếu không có synthetic click thì ref vẫn true
+    // và lần chạm đầu sẽ bị nuốt — reset ở đây để chỉ cần một lần chạm để lật.
+    blockClickFromSwipeRef.current = false;
     const t = e.touches[0];
     touchStartRef.current = { x: t.clientX, y: t.clientY };
   };
