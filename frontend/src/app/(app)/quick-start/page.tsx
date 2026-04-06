@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 const sampleGoogleSheetUrl =
-  "https://docs.google.com/spreadsheets/d/1bBZ-s5hLmk6KYcfnhwyp0cb9JD1ui1WielZ5CPkFVdc/edit?gid=519826982#gid=519826982";
+  "https://docs.google.com/spreadsheets/d/1AVY5M9NCYanCcGWM73XwdUYB74_koPp4fgi_OynCwa0/edit?usp=sharing";
 
 const sheetUrlToExportXlsx = (url: string): string | null => {
   const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
