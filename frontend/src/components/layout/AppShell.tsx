@@ -10,6 +10,7 @@ import { UserMenu } from "@/components/layout/UserMenu";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import type { ReactNode } from "react";
 import {
+  FaRocket,
   FaHome,
   FaFileImport,
   FaBook,
@@ -35,6 +36,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
+  { href: "/quick-start", label: "Quick Start", icon: <FaRocket /> },
   { href: "/home", label: "Bảng tin", icon: <FaHome /> },
   { href: "/excel", label: "Kho excel", icon: <FaFileImport /> },
   { href: "/vocabulary", label: "Từ vựng", icon: <FaBook /> },
@@ -108,7 +110,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </span>
           </button>
 
-          <Link href="/home" className="shrink-0 text-xl font-bold tracking-tight lg:mr-auto">
+          <Link href="/quick-start" className="shrink-0 text-xl font-bold tracking-tight lg:mr-auto">
             <span className="text-[#E50914]">Mika</span>
             <span className={isLight ? "text-zinc-900" : "text-[var(--mika-fg)]"}> English</span>
           </Link>

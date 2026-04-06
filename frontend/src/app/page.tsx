@@ -9,7 +9,7 @@ export default function RootPage() {
 
   useEffect(() => {
     if (getAccessToken()) {
-      router.replace("/home");
+      router.replace("/quick-start");
     } else {
       router.replace("/login");
     }

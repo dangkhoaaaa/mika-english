@@ -14,7 +14,7 @@ export function LoginForm() {
   const isLight = theme === "light";
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/home";
+  const redirect = searchParams.get("redirect") || "/quick-start";
 
   const [mode, setMode] = useState<Mode>("login");
   const [form, setForm] = useState({
@@ -29,7 +29,7 @@ export function LoginForm() {
 
   useEffect(() => {
     if (getAccessToken()) {
-      router.replace("/home");
+      router.replace("/quick-start");
       return;
     }
     setCheckingSession(false);
